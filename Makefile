@@ -2,7 +2,8 @@ PROJECTNAME="Bird Bot"
 PROJECT_BIN="birdbot"
 
 # Go related variables.
-GOBIN=./build
+GOBASE=$(shell pwd)
+GOBIN=$(GOBASE)/build
 GOFILES=$(wildcard *.go)
 
 # Make is verbose in Linux. Make it silent.
