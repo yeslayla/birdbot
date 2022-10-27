@@ -19,10 +19,10 @@ type Event struct {
 
 func (event *Event) GetChannelName() string {
 	month := event.GetMonthPrefix()
-	day := event.DateTime.Day() - 1
+	day := event.DateTime.Day()
 	city := event.GetCityFromLocation()
 
-	channel := fmt.Sprint(month, "-", day, "-", city, "-", event.Name)
+	channel := fmt.Sprint(month, "-", day, city, "-", event.Name)
 	channel = strings.ReplaceAll(channel, " ", "-")
 	channel = strings.ToLower(channel)
 
@@ -46,7 +46,7 @@ func (event *Event) GetCityFromLocation() string {
 		if part == "mi" || part == "michigan" {
 			index = i - 1
 			if index < 0 {
-				return "unknown"
+				return ""
 			}
 			if index > 0 && parts[index] == "," {
 				index -= 1
@@ -62,7 +62,7 @@ func (event *Event) GetCityFromLocation() string {
 		}
 	}
 
-	return loc
+	return fmt.Sprint("-", loc)
 }
 
 func (event *Event) GetMonthPrefix() string {
