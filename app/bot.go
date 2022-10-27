@@ -94,6 +94,7 @@ func (app *Bot) Notify(message string) {
 }
 
 func (app *Bot) onReady(s *discordgo.Session, r *discordgo.Ready) {
+	app.Notify("BirdBot is ready!")
 	log.Print("BirdBot is ready!")
 }
 

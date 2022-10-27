@@ -10,5 +10,5 @@ type DiscordConfig struct {
 
 	EventCategory       string `yaml:"event_category" env:"DISCORD_EVENT_CATEGORY"`
 	ArchiveCategory     string `yaml:"archive_category" env:"DISCORD_ARCHIVE_CATEGORY"`
-	NotificationChannel string `yaml:"notification_channel" env:"DISCORD_ARCHIVE_CATEGORY"`
+	NotificationChannel string `yaml:"notification_channel" env:"DISCORD_NOTIFICATION_CHANNEL"`
 }
