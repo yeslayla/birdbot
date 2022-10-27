@@ -106,6 +106,10 @@ func (app *Bot) onReady(s *discordgo.Session, r *discordgo.Ready) {
 }
 
 func (app *Bot) onEventCreate(s *discordgo.Session, r *discordgo.GuildScheduledEventCreate) {
+	if r.GuildID != app.guildID {
+		return
+	}
+
 	event := &Event{}
 	event.Name = r.Name
 	event.OrganizerID = r.CreatorID
@@ -135,6 +139,9 @@ func (app *Bot) onEventCreate(s *discordgo.Session, r *discordgo.GuildScheduledE
 }
 
 func (app *Bot) onEventDelete(s *discordgo.Session, r *discordgo.GuildScheduledEventDelete) {
+	if r.GuildID != app.guildID {
+		return
+	}
 
 	// Create Event Object
 	event := &Event{}
@@ -156,6 +163,9 @@ func (app *Bot) onEventDelete(s *discordgo.Session, r *discordgo.GuildScheduledE
 }
 
 func (app *Bot) onEventUpdate(s *discordgo.Session, r *discordgo.GuildScheduledEventUpdate) {
+	if r.GuildID != app.guildID {
+		return
+	}
 
 	// Create Event Object
 	event := &Event{}
@@ -176,6 +186,7 @@ func (app *Bot) onEventUpdate(s *discordgo.Session, r *discordgo.GuildScheduledE
 }
 
 func (app *Bot) onEventComplete(s *discordgo.Session, event *Event) {
+
 	channel_name := event.GetChannelName()
 
 	if app.archiveCategoryID != "" {
