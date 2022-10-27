@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -26,13 +27,21 @@ type Bot struct {
 // Initalize creates the discord session and registers handlers
 func (app *Bot) Initialize(config_path string) error {
 	log.Printf("Using config: %s", config_path)
-
 	cfg := &Config{}
-	err := cleanenv.ReadConfig(config_path, cfg)
-	if err != nil {
-		return err
-	}
 
+	_, err := os.Stat(config_path)
+	if errors.Is(err, os.ErrNotExist) {
+		log.Printf("Config file not found: '%s'", config_path)
+		err := cleanenv.ReadEnv(&cfg)
+		if err != nil {
+			return nil
+		}
+	} else {
+		err := cleanenv.ReadConfig(config_path, cfg)
+		if err != nil {
+			return err
+		}
+	}
 	// Load directly from config
 	app.guildID = cfg.Discord.GuildID
 	app.eventCategoryID = cfg.Discord.EventCategory
