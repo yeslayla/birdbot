@@ -1,0 +1,11 @@
+discord:
+  # Discord Bot Token
+  token: ""
+
+  # ID of Discord Server to Monitor
+  guild_id: ""
+
+  # Category & Channel IDs
+  event_category: ""
+  archive_category: ""
+  notification_channel: ""
