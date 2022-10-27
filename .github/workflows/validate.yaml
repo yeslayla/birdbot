@@ -1,4 +1,4 @@
-name: Publish
+name: Validate
 
 on:
   push: {}
@@ -6,7 +6,7 @@ on:
 
 jobs:
   publish:
-    name: Build & Publish
+    name: Test & Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
