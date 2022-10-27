@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/manleydev/bird-bot/app"
+	"github.com/yeslayla/bird-bot/app"
 )
 
 func main() {
