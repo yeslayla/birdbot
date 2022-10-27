@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ilyakaznacheev/cleanenv"
@@ -32,9 +31,9 @@ func (app *Bot) Initialize(config_path string) error {
 	_, err := os.Stat(config_path)
 	if errors.Is(err, os.ErrNotExist) {
 		log.Printf("Config file not found: '%s'", config_path)
-		err := cleanenv.ReadEnv(&cfg)
+		err := cleanenv.ReadEnv(cfg)
 		if err != nil {
-			return nil
+			return err
 		}
 	} else {
 		err := cleanenv.ReadConfig(config_path, cfg)
@@ -77,7 +76,6 @@ func (app *Bot) Run() error {
 
 	// Keep alive
 	app.stop = make(chan os.Signal, 1)
-	signal.Notify(app.stop, os.Interrupt)
 	<-app.stop
 	return nil
 }

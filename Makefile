@@ -48,6 +48,9 @@ docker-build:
 docker-run: docker-build
 	@docker run -it -v `pwd`/build:/etc/birdbot yeslayla/birdbot:latest
 
+docker-push: docker-build
+	@docker push yeslayla/birdbot:latest
+
 ## install: Download and install dependencies
 install: go-get
 
