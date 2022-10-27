@@ -1,4 +1,4 @@
-module github.com/yeslayla/bird-bot
+module github.com/yeslayla/birdbot
 
 go 1.19
 
