@@ -11,6 +11,9 @@ import (
 	"github.com/yeslayla/birdbot/discord"
 )
 
+var Version string
+var Build string
+
 type Bot struct {
 	session *discord.Discord
 
@@ -78,7 +81,7 @@ func (app *Bot) Notify(message string) {
 		return
 	}
 
-	log.Println("Notification: ", message)
+	log.Print("Notification: ", message)
 
 	channel := app.session.NewChannelFromID(app.notificationChannelID)
 	if channel == nil {
@@ -92,7 +95,7 @@ func (app *Bot) Notify(message string) {
 }
 
 func (app *Bot) onReady(d *discord.Discord) {
-	app.Notify("BirdBot is ready!")
+	app.Notify(fmt.Sprintf("BirdBot %s is ready!", Version))
 }
 
 func (app *Bot) onEventCreate(d *discord.Discord, event *core.Event) {
