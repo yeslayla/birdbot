@@ -34,7 +34,8 @@ func (discord *Discord) NewChannelFromName(channel_name string) (*core.Channel, 
 
 		// Found channel!
 		if channel.Name == channel_name {
-			log.Printf("Tried to create channel, but it already exists '%s'", channel_name)
+
+			// Channel already exists!
 			return &core.Channel{
 				Name:     channel.Name,
 				ID:       channel.ID,
@@ -56,10 +57,25 @@ func (discord *Discord) NewChannelFromName(channel_name string) (*core.Channel, 
 	}, nil
 }
 
+// GetVerifiedChannel looks up channel data and returns a verified objec
+func (discord *Discord) GetVerifiedChannel(channel *core.Channel) *core.Channel {
+	if channel.ID != "" {
+		return discord.NewChannelFromID(channel.ID)
+	}
+	if channel.Name != "" {
+		channel, err := discord.NewChannelFromName(channel.Name)
+		if err != nil {
+			log.Println("Failed to verify channel by name: ", err)
+		}
+		return channel
+	}
+	return nil
+}
+
 // DeleteChannel deletes a channel
 func (discord *Discord) DeleteChannel(channel *core.Channel) (bool, error) {
 	if channel.Verified == false {
-		return false, fmt.Errorf("failed to delete channel: given channel object is not verified")
+		channel = discord.GetVerifiedChannel(channel)
 	}
 
 	_, err := discord.session.ChannelDelete(channel.ID)
@@ -93,7 +109,7 @@ func (discord *Discord) getChannelID(channel_name string) (string, error) {
 // SendMessage sends a message to a given channel
 func (discord *Discord) SendMessage(channel *core.Channel, message string) error {
 	if channel.Verified == false {
-		return fmt.Errorf("failed to delete channel: given channel object is not verified")
+		channel = discord.GetVerifiedChannel(channel)
 	}
 
 	_, err := discord.session.ChannelMessageSend(channel.ID, message)
@@ -103,7 +119,7 @@ func (discord *Discord) SendMessage(channel *core.Channel, message string) error
 // MoveChannelToCategory places a channel in a given category
 func (discord *Discord) MoveChannelToCategory(channel *core.Channel, categoryID string) error {
 	if channel.Verified == false {
-		return fmt.Errorf("failed to delete channel: given channel object is not verified")
+		channel = discord.GetVerifiedChannel(channel)
 	}
 
 	// Move to archive category
@@ -114,4 +130,17 @@ func (discord *Discord) MoveChannelToCategory(channel *core.Channel, categoryID 
 	}
 
 	return nil
+}
+
+// ArchiveChannel archives a channel
+func (discord *Discord) ArchiveChannel(channel *core.Channel) error {
+	if channel.Verified == false {
+		channel = discord.GetVerifiedChannel(channel)
+	}
+
+	_, err := discord.session.ChannelEdit(channel.ID, &discordgo.ChannelEdit{
+		Archived: core.Bool(true),
+	})
+
+	return err
 }

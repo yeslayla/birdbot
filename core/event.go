@@ -41,7 +41,7 @@ func (event *Event) Channel() *Channel {
 func (event *Event) GetCityFromLocation() string {
 
 	if event.Location == REMOTE_LOCATION {
-		return REMOTE_LOCATION
+		return fmt.Sprint("-", REMOTE_LOCATION)
 	}
 	parts := strings.Split(event.Location, " ")
 	index := -1

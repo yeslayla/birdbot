@@ -1,14 +1,20 @@
 package discord
 
 import (
+	"log"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/yeslayla/birdbot/core"
 )
 
-// NewUSer creates a new user object from a discordgo.User object
+// NewUser creates a new user object from a discordgo.User object
 func NewUser(user *discordgo.User) *core.User {
+	if user == nil {
+		log.Print("Cannot user object, user is nil!")
+		return nil
+	}
+
 	return &core.User{
-		Name: user.Username,
-		ID:   user.ID,
+		ID: user.ID,
 	}
 }

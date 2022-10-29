@@ -8,10 +8,12 @@ import (
 // NewEvent converts a discordgo.GuildScheduledEvent to birdbot event
 func NewEvent(guildEvent *discordgo.GuildScheduledEvent) *core.Event {
 	event := &core.Event{
-		Name:      guildEvent.Name,
-		ID:        guildEvent.ID,
-		Organizer: NewUser(guildEvent.Creator),
-		DateTime:  guildEvent.ScheduledStartTime,
+		Name: guildEvent.Name,
+		ID:   guildEvent.ID,
+		Organizer: &core.User{
+			ID: guildEvent.CreatorID,
+		},
+		DateTime: guildEvent.ScheduledStartTime,
 	}
 
 	event.Completed = guildEvent.Status == discordgo.GuildScheduledEventStatusCompleted

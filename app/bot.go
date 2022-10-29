@@ -139,8 +139,13 @@ func (app *Bot) onEventComplete(d *discord.Discord, event *core.Event) {
 	if app.archiveCategoryID != "" {
 
 		if err := app.session.MoveChannelToCategory(channel, app.archiveCategoryID); err != nil {
+			log.Print("Failed to move channel to archive category: ", err)
+		}
+
+		if err := app.session.ArchiveChannel(channel); err != nil {
 			log.Print("Failed to archive channel: ", err)
 		}
+
 		log.Printf("Archived channel: '%s'", channel.Name)
 
 	} else {

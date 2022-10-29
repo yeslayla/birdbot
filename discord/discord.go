@@ -32,6 +32,7 @@ func New(guildID string, token string) *Discord {
 
 	return &Discord{
 		session: session,
+		guildID: guildID,
 	}
 }
 
