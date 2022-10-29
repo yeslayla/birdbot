@@ -19,6 +19,7 @@ type Event struct {
 	Organizer *User
 }
 
+// Channel returns a channel object associated with an event
 func (event *Event) Channel() *Channel {
 
 	month := event.GetMonthPrefix()
@@ -38,6 +39,7 @@ func (event *Event) Channel() *Channel {
 	}
 }
 
+// GetCityFromLocation returns the city name of an event's location
 func (event *Event) GetCityFromLocation() string {
 
 	if event.Location == REMOTE_LOCATION {
@@ -71,6 +73,7 @@ func (event *Event) GetCityFromLocation() string {
 	return fmt.Sprint("-", loc)
 }
 
+// GetMonthPrefix returns a month in short form
 func (event *Event) GetMonthPrefix() string {
 	month := event.DateTime.Month()
 	data := map[time.Month]string{
