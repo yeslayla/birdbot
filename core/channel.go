@@ -1,6 +1,7 @@
 package core
 
 type Channel struct {
-	Name string
-	ID   string
+	Name     string
+	ID       string
+	Verified bool
 }

@@ -10,9 +10,11 @@ import (
 const REMOTE_LOCATION string = "online"
 
 type Event struct {
-	Name     string
-	Location string
-	DateTime time.Time
+	Name      string
+	ID        string
+	Location  string
+	Completed bool
+	DateTime  time.Time
 
 	Organizer *User
 }
@@ -31,7 +33,8 @@ func (event *Event) Channel() *Channel {
 	channel = re.ReplaceAllString(channel, "")
 
 	return &Channel{
-		Name: channel,
+		Name:     channel,
+		Verified: false,
 	}
 }
 
