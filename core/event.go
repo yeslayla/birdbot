@@ -1,4 +1,4 @@
-package app
+package core
 
 import (
 	"fmt"
@@ -14,10 +14,11 @@ type Event struct {
 	Location string
 	DateTime time.Time
 
-	OrganizerID string
+	Organizer *User
 }
 
-func (event *Event) GetChannelName() string {
+func (event *Event) Channel() *Channel {
+
 	month := event.GetMonthPrefix()
 	day := event.DateTime.Day()
 	city := event.GetCityFromLocation()
@@ -29,7 +30,9 @@ func (event *Event) GetChannelName() string {
 	re, _ := regexp.Compile(`[^\w\-]`)
 	channel = re.ReplaceAllString(channel, "")
 
-	return channel
+	return &Channel{
+		Name: channel,
+	}
 }
 
 func (event *Event) GetCityFromLocation() string {

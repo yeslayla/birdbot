@@ -5,13 +5,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/yeslayla/birdbot/core"
+	"github.com/yeslayla/birdbot/discord"
 )
 
 type Bot struct {
-	discord *discordgo.Session
+	session *discordgo.Session
+	d       *discord.Discord
 
 	// Discord Objects
 	guildID               string
@@ -26,7 +30,7 @@ type Bot struct {
 // Initalize creates the discord session and registers handlers
 func (app *Bot) Initialize(config_path string) error {
 	log.Printf("Using config: %s", config_path)
-	cfg := &Config{}
+	cfg := &core.Config{}
 
 	_, err := os.Stat(config_path)
 	if errors.Is(err, os.ErrNotExist) {
@@ -52,16 +56,17 @@ func (app *Bot) Initialize(config_path string) error {
 	}
 
 	// Create Discord Session
-	app.discord, err = discordgo.New(fmt.Sprint("Bot ", cfg.Discord.Token))
+	app.session, err = discordgo.New(fmt.Sprint("Bot ", cfg.Discord.Token))
 	if err != nil {
 		return fmt.Errorf("failed to create Discord session: %v", err)
 	}
+	app.d = discord.NewDiscord(app.session)
 
 	// Register Event Handlers
-	app.discord.AddHandler(app.onReady)
-	app.discord.AddHandler(app.onEventCreate)
-	app.discord.AddHandler(app.onEventDelete)
-	app.discord.AddHandler(app.onEventUpdate)
+	app.session.AddHandler(app.onReady)
+	app.session.AddHandler(app.onEventCreate)
+	app.session.AddHandler(app.onEventDelete)
+	app.session.AddHandler(app.onEventUpdate)
 
 	return nil
 }
@@ -69,13 +74,14 @@ func (app *Bot) Initialize(config_path string) error {
 // Run opens the session with Discord until exit
 func (app *Bot) Run() error {
 
-	if err := app.discord.Open(); err != nil {
+	if err := app.session.Open(); err != nil {
 		return fmt.Errorf("failed to open Discord session: %v", err)
 	}
-	defer app.discord.Close()
+	defer app.session.Close()
 
 	// Keep alive
 	app.stop = make(chan os.Signal, 1)
+	signal.Notify(app.stop, os.Interrupt)
 	<-app.stop
 	return nil
 }
@@ -89,20 +95,25 @@ func (app *Bot) Stop() {
 // Notify sends a message to the notification channe;
 func (app *Bot) Notify(message string) {
 	if app.notificationChannelID == "" {
+		log.Println(message)
 		return
 	}
 
-	_, err := app.discord.ChannelMessageSend(app.notificationChannelID, message)
-
 	log.Println("Notification: ", message)
+
+	channel := app.d.NewChannelFromID(app.notificationChannelID)
+	if channel == nil {
+		log.Printf("Failed notification: channel was not found with ID '%v'", app.notificationChannelID)
+	}
+
+	err := app.d.SendMessage(channel, message)
 	if err != nil {
-		log.Println("Failed notification: ", err)
+		log.Print("Failed notification: ", err)
 	}
 }
 
 func (app *Bot) onReady(s *discordgo.Session, r *discordgo.Ready) {
 	app.Notify("BirdBot is ready!")
-	log.Print("BirdBot is ready!")
 }
 
 func (app *Bot) onEventCreate(s *discordgo.Session, r *discordgo.GuildScheduledEventCreate) {
@@ -110,18 +121,10 @@ func (app *Bot) onEventCreate(s *discordgo.Session, r *discordgo.GuildScheduledE
 		return
 	}
 
-	event := &Event{}
-	event.Name = r.Name
-	event.OrganizerID = r.CreatorID
-	event.DateTime = r.ScheduledStartTime
-	if r.EntityType != discordgo.GuildScheduledEventEntityTypeExternal {
-		event.Location = REMOTE_LOCATION
-	} else {
-		event.Location = r.EntityMetadata.Location
-	}
+	event := discord.NewEvent(r.GuildScheduledEvent)
 	log.Print("Event Created: '", event.Name, "':'", event.Location, "'")
 
-	channel, err := CreateChannelIfNotExists(s, app.guildID, event.GetChannelName())
+	channel, err := app.d.CreateChannelIfNotExists(app.guildID, event.Channel().Name)
 	if err != nil {
 		log.Print("Failed to create channel for event: ", err)
 	}
@@ -135,7 +138,7 @@ func (app *Bot) onEventCreate(s *discordgo.Session, r *discordgo.GuildScheduledE
 	}
 
 	eventURL := fmt.Sprintf("https://discordapp.com/events/%s/%s", app.guildID, r.ID)
-	app.Notify(fmt.Sprintf("<@%s> is organizing an event '%s': %s", event.OrganizerID, event.Name, eventURL))
+	app.Notify(fmt.Sprintf("%s is organizing an event '%s': %s", event.Organizer.Mention(), event.Name, eventURL))
 }
 
 func (app *Bot) onEventDelete(s *discordgo.Session, r *discordgo.GuildScheduledEventDelete) {
@@ -144,22 +147,14 @@ func (app *Bot) onEventDelete(s *discordgo.Session, r *discordgo.GuildScheduledE
 	}
 
 	// Create Event Object
-	event := &Event{}
-	event.Name = r.Name
-	event.OrganizerID = r.CreatorID
-	event.DateTime = r.ScheduledStartTime
-	if r.EntityType != discordgo.GuildScheduledEventEntityTypeExternal {
-		event.Location = REMOTE_LOCATION
-	} else {
-		event.Location = r.EntityMetadata.Location
-	}
+	event := discord.NewEvent(r.GuildScheduledEvent)
 
-	_, err := DeleteChannel(app.discord, app.guildID, event.GetChannelName())
+	_, err := app.d.DeleteChannel(app.guildID, event.Channel().Name)
 	if err != nil {
 		log.Print("Failed to create channel for event: ", err)
 	}
 
-	app.Notify(fmt.Sprintf("<@%s> cancelled '%s' on %s, %d!", event.OrganizerID, event.Name, event.DateTime.Month().String(), event.DateTime.Day()))
+	app.Notify(fmt.Sprintf("%s cancelled '%s' on %s, %d!", event.Organizer.Mention(), event.Name, event.DateTime.Month().String(), event.DateTime.Day()))
 }
 
 func (app *Bot) onEventUpdate(s *discordgo.Session, r *discordgo.GuildScheduledEventUpdate) {
@@ -168,15 +163,7 @@ func (app *Bot) onEventUpdate(s *discordgo.Session, r *discordgo.GuildScheduledE
 	}
 
 	// Create Event Object
-	event := &Event{}
-	event.Name = r.Name
-	event.OrganizerID = r.CreatorID
-	event.DateTime = r.ScheduledStartTime
-	if r.EntityType != discordgo.GuildScheduledEventEntityTypeExternal {
-		event.Location = REMOTE_LOCATION
-	} else {
-		event.Location = r.EntityMetadata.Location
-	}
+	event := discord.NewEvent(r.GuildScheduledEvent)
 
 	// Pass event onwards
 	switch r.Status {
@@ -185,37 +172,26 @@ func (app *Bot) onEventUpdate(s *discordgo.Session, r *discordgo.GuildScheduledE
 	}
 }
 
-func (app *Bot) onEventComplete(s *discordgo.Session, event *Event) {
+func (app *Bot) onEventComplete(s *discordgo.Session, event *core.Event) {
 
-	channel_name := event.GetChannelName()
+	channel := event.Channel()
 
 	if app.archiveCategoryID != "" {
 
-		// Get Channel ID
-		id, err := GetChannelID(s, app.guildID, channel_name)
-		if err != nil {
-			log.Printf("Failed to archive channel: %v", err)
-			return
+		if err := app.d.MoveChannelToCategory(app.guildID, app.archiveCategoryID, channel); err != nil {
+			log.Print("Failed to archive channel: ", err)
 		}
+		log.Printf("Archived channel: '%s'", channel.Name)
 
-		// Move to archive category
-		if _, err := s.ChannelEdit(id, &discordgo.ChannelEdit{
-			ParentID: app.archiveCategoryID,
-		}); err != nil {
-			log.Printf("Failed to move channel to archive category: %v", err)
-			return
-		}
-
-		log.Printf("Archived channel: '%s'", channel_name)
 	} else {
 
 		// Delete Channel
-		_, err := DeleteChannel(s, app.guildID, channel_name)
+		_, err := app.d.DeleteChannel(app.guildID, channel.Name)
 		if err != nil {
 			log.Print("Failed to delete channel: ", err)
 		}
 
-		log.Printf("Deleted channel: '%s'", channel_name)
+		log.Printf("Deleted channel: '%s'", channel.Name)
 	}
 }
 

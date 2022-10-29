@@ -1,4 +1,4 @@
-package app
+package core
 
 type Config struct {
 	Discord DiscordConfig `yaml:"discord"`
