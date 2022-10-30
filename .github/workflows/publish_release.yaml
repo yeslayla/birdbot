@@ -28,7 +28,7 @@ jobs:
           make test
       - name: Build
         run: |
-          make build
+          make build VERSION="${{ env.RELEASE_VERSION }}"
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')

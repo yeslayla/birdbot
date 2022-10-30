@@ -1,5 +1,7 @@
 PROJECTNAME="Bird Bot"
 PROJECT_BIN="birdbot"
+VERSION="DEV"
+BUILD_NUMBER:=$(shell date "+%s%N" | cut -b1-13)
 
 # Go related variables.
 GOBASE=$(shell pwd)
@@ -14,7 +16,7 @@ go-full-build: go-clean go-get go-build
 go-build:
 	@echo "  >  Building binary..."
 	@mkdir -p $(GOBIN)
-	@GOOS=linux CGO_ENABLED=0 go build -o $(GOBIN)/$(PROJECT_BIN) $(GOFILES)
+	@GOOS=linux CGO_ENABLED=0 go build -ldflags "-X github.com/yeslayla/birdbot/app.Version=$(VERSION) -X github.com/yeslayla/birdbot/app.Build=$(BUILD_NUMBER)" -o $(GOBIN)/$(PROJECT_BIN) $(GOFILES)
 	@chmod 755 $(GOBIN)/$(PROJECT_BIN)
 
 go-generate:

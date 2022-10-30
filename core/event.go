@@ -1,4 +1,4 @@
-package app
+package core
 
 import (
 	"fmt"
@@ -10,14 +10,18 @@ import (
 const REMOTE_LOCATION string = "online"
 
 type Event struct {
-	Name     string
-	Location string
-	DateTime time.Time
+	Name      string
+	ID        string
+	Location  string
+	Completed bool
+	DateTime  time.Time
 
-	OrganizerID string
+	Organizer *User
 }
 
-func (event *Event) GetChannelName() string {
+// Channel returns a channel object associated with an event
+func (event *Event) Channel() *Channel {
+
 	month := event.GetMonthPrefix()
 	day := event.DateTime.Day()
 	city := event.GetCityFromLocation()
@@ -29,13 +33,17 @@ func (event *Event) GetChannelName() string {
 	re, _ := regexp.Compile(`[^\w\-]`)
 	channel = re.ReplaceAllString(channel, "")
 
-	return channel
+	return &Channel{
+		Name:     channel,
+		Verified: false,
+	}
 }
 
+// GetCityFromLocation returns the city name of an event's location
 func (event *Event) GetCityFromLocation() string {
 
 	if event.Location == REMOTE_LOCATION {
-		return REMOTE_LOCATION
+		return fmt.Sprint("-", REMOTE_LOCATION)
 	}
 	parts := strings.Split(event.Location, " ")
 	index := -1
@@ -65,6 +73,7 @@ func (event *Event) GetCityFromLocation() string {
 	return fmt.Sprint("-", loc)
 }
 
+// GetMonthPrefix returns a month in short form
 func (event *Event) GetMonthPrefix() string {
 	month := event.DateTime.Month()
 	data := map[time.Month]string{
