@@ -1,7 +1,7 @@
 PROJECTNAME="Bird Bot"
 PROJECT_BIN="birdbot"
 VERSION="DEV"
-BUILD_NUMBER:=$(shell date "+%s%N" | cut -b1-13)
+BUILD_NUMBER:=$(shell git rev-parse --short HEAD)
 
 # Go related variables.
 GOBASE=$(shell pwd)
