@@ -9,13 +9,15 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/yeslayla/birdbot/core"
 	"github.com/yeslayla/birdbot/discord"
+	"github.com/yeslayla/birdbot/mastodon"
 )
 
 var Version string
 var Build string
 
 type Bot struct {
-	session *discord.Discord
+	session  *discord.Discord
+	mastodon *mastodon.Mastodon
 
 	// Discord Objects
 	guildID               string
@@ -50,6 +52,13 @@ func (app *Bot) Initialize(config_path string) error {
 
 	if app.guildID == "" {
 		return fmt.Errorf("discord Guild ID is not set")
+	}
+
+	if cfg.Mastodon.ClientID != "" && cfg.Mastodon.ClientSecret != "" &&
+		cfg.Mastodon.Username != "" && cfg.Mastodon.Password != "" &&
+		cfg.Mastodon.Server != "" {
+		app.mastodon = mastodon.NewMastodon(cfg.Mastodon.Server, cfg.Mastodon.ClientID, cfg.Mastodon.ClientSecret,
+			cfg.Mastodon.Username, cfg.Mastodon.Password)
 	}
 
 	app.session = discord.New(app.guildID, cfg.Discord.Token)
@@ -116,6 +125,13 @@ func (app *Bot) onEventCreate(d *discord.Discord, event *core.Event) {
 
 	eventURL := fmt.Sprintf("https://discordapp.com/events/%s/%s", app.guildID, event.ID)
 	app.Notify(fmt.Sprintf("%s is organizing an event '%s': %s", event.Organizer.Mention(), event.Name, eventURL))
+
+	if app.mastodon != nil {
+		err = app.mastodon.Toot(fmt.Sprintf("A new event has been organized '%s': %s", event.Name, eventURL))
+		if err != nil {
+			fmt.Println("Failed to send Mastodon Toot:", err)
+		}
+	}
 }
 
 func (app *Bot) onEventDelete(d *discord.Discord, event *core.Event) {
@@ -126,6 +142,13 @@ func (app *Bot) onEventDelete(d *discord.Discord, event *core.Event) {
 	}
 
 	app.Notify(fmt.Sprintf("%s cancelled '%s' on %s, %d!", event.Organizer.Mention(), event.Name, event.DateTime.Month().String(), event.DateTime.Day()))
+
+	if app.mastodon != nil {
+		err = app.mastodon.Toot(fmt.Sprintf("'%s' cancelled on %s, %d!", event.Name, event.DateTime.Month().String(), event.DateTime.Day()))
+		if err != nil {
+			fmt.Println("Failed to send Mastodon Toot:", err)
+		}
+	}
 }
 
 func (app *Bot) onEventUpdate(d *discord.Discord, event *core.Event) {

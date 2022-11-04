@@ -9,3 +9,11 @@ discord:
   event_category: ""
   archive_category: ""
   notification_channel: ""
+
+
+# mastodon:
+#   server: https://mastodon.social
+#   username: my_user
+#   password: secret
+#   client_id: 1234
+#   client_secret: secret2
