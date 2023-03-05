@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/yeslayla/birdbot/core"
@@ -104,7 +105,7 @@ func (app *Bot) Notify(message string) {
 }
 
 func (app *Bot) onReady(d *discord.Discord) {
-	app.Notify(fmt.Sprintf("BirdBot %s is ready!", Version))
+	app.session.SetStatus(fmt.Sprintf("with fire! (%s)", Version))
 }
 
 func (app *Bot) onEventCreate(d *discord.Discord, event *core.Event) {
@@ -183,6 +184,18 @@ func (app *Bot) onEventComplete(d *discord.Discord, event *core.Event) {
 		}
 
 		log.Printf("Deleted channel: '%s'", channel.Name)
+	}
+
+	if strings.Contains(strings.ToLower(event.Description), "recurring weekly") {
+		startTime := event.DateTime.AddDate(0, 0, 7)
+		finishTime := event.CompleteTime.AddDate(0, 0, 7)
+		nextEvent := event
+		nextEvent.DateTime = startTime
+		nextEvent.CompleteTime = finishTime
+
+		if err := app.session.CreateEvent(nextEvent); err != nil {
+			log.Print("Failed to create recurring event: ", err)
+		}
 	}
 }
 

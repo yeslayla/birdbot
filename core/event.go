@@ -10,11 +10,14 @@ import (
 const REMOTE_LOCATION string = "online"
 
 type Event struct {
-	Name      string
-	ID        string
-	Location  string
-	Completed bool
-	DateTime  time.Time
+	Name         string
+	ID           string
+	Location     string
+	Completed    bool
+	DateTime     time.Time
+	CompleteTime time.Time
+	Description  string
+	Image        string
 
 	Organizer *User
 }
@@ -25,8 +28,9 @@ func (event *Event) Channel() *Channel {
 	month := event.GetMonthPrefix()
 	day := event.DateTime.Day()
 	city := event.GetCityFromLocation()
+	year := event.DateTime.Year()
 
-	channel := fmt.Sprint(month, "-", day, city, "-", event.Name)
+	channel := fmt.Sprint(month, "-", day, city, "-", event.Name, "-", year)
 	channel = strings.ReplaceAll(channel, " ", "-")
 	channel = strings.ToLower(channel)
 

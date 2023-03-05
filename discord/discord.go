@@ -95,3 +95,9 @@ func (discord *Discord) OnEventUpdate(handler func(*Discord, *core.Event)) {
 		handler(discord, event)
 	})
 }
+
+func (discord *Discord) SetStatus(status string) {
+	if err := discord.session.UpdateGameStatus(0, status); err != nil {
+		log.Fatal("Failed to update status: ", err)
+	}
+}

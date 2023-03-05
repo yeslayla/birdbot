@@ -16,7 +16,7 @@ func TestGetChannelName(t *testing.T) {
 		Location: "1234 Place Rd, Ann Arbor, MI 00000",
 		DateTime: time.Date(2022, time.January, 5, 0, 0, 0, 0, time.UTC),
 	}
-	assert.Equal("jan-5-ann-arbor-hello-world", event.Channel().Name)
+	assert.Equal("jan-5-ann-arbor-hello-world-2022", event.Channel().Name)
 
 	// Test Unparsable Location
 	// lmanley: Note it'd be nice to expand support for this
@@ -25,7 +25,7 @@ func TestGetChannelName(t *testing.T) {
 		Location: "Michigan Theater, Ann Arbor",
 		DateTime: time.Date(2022, time.January, 5, 0, 0, 0, 0, time.UTC),
 	}
-	assert.Equal("jan-5-hello-world", event.Channel().Name)
+	assert.Equal("jan-5-hello-world-2022", event.Channel().Name)
 
 	// Test Short Location
 	event = Event{
@@ -33,7 +33,7 @@ func TestGetChannelName(t *testing.T) {
 		Location: "Monroe, MI",
 		DateTime: time.Date(2022, time.January, 5, 0, 0, 0, 0, time.UTC),
 	}
-	assert.Equal("jan-5-monroe-hello-world", event.Channel().Name)
+	assert.Equal("jan-5-monroe-hello-world-2022", event.Channel().Name)
 
 	// Test Short Location
 	event = Event{
@@ -41,7 +41,7 @@ func TestGetChannelName(t *testing.T) {
 		Location: "Monroe St, Monroe , MI",
 		DateTime: time.Date(2022, time.January, 5, 0, 0, 0, 0, time.UTC),
 	}
-	assert.Equal("jan-5-monroe-hello-world", event.Channel().Name)
+	assert.Equal("jan-5-monroe-hello-world-2022", event.Channel().Name)
 
 	// Test Remote Event
 	event = Event{
@@ -49,7 +49,7 @@ func TestGetChannelName(t *testing.T) {
 		Location: REMOTE_LOCATION,
 		DateTime: time.Date(2022, time.January, 5, 0, 0, 0, 0, time.UTC),
 	}
-	assert.Equal("jan-5-online-hello-world", event.Channel().Name)
+	assert.Equal("jan-5-online-hello-world-2022", event.Channel().Name)
 }
 
 func TestMonthPrefix(t *testing.T) {
