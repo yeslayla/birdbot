@@ -8,6 +8,7 @@ Bird Bot is a discord bot for managing and organizing events for a small discord
 - Notifying when events are created & cancelled
 - Delete text channels after events
 - Archive text channels after events
+- Create recurring weekly events
 
 ## Usage
 
