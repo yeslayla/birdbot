@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Event represents a calendar event
 type Event struct {
 	Name             string
 	ID               string

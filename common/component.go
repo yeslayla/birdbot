@@ -4,6 +4,8 @@ type Component interface {
 	Initialize(birdbot ComponentManager) error
 }
 
+// ComponentManager is the primary way for a component to interact with BirdBot
+// by listening to events and committing actions
 type ComponentManager interface {
 	OnReady(func() error) error
 
@@ -15,8 +17,9 @@ type ComponentManager interface {
 	OnEventUpdate(func(Event) error) error
 	OnEventComplete(func(Event) error) error
 
-	RegisterGameModule(ID string, plugin GameModule) error
-
+	// Actions
 	CreateEvent(event Event) error
 	Notify(message string) error
+
+	RegisterGameModule(ID string, plugin GameModule) error
 }

@@ -31,7 +31,7 @@ func NewEvent(guildEvent *discordgo.GuildScheduledEvent) common.Event {
 	event.Completed = guildEvent.Status == discordgo.GuildScheduledEventStatusCompleted
 
 	if guildEvent.EntityType != discordgo.GuildScheduledEventEntityTypeExternal {
-		event.Location = core.REMOTE_LOCATION
+		event.Location = core.RemoteLocation
 	} else {
 		event.Location = guildEvent.EntityMetadata.Location
 	}

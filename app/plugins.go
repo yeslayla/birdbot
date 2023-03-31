@@ -8,25 +8,23 @@ import (
 	"github.com/yeslayla/birdbot/common"
 )
 
-type PluginLoader struct{}
+// LoadPlugin loads a plugin and returns its component if successful
+func LoadPlugin(pluginPath string) common.Component {
 
-func NewPluginLoader() PluginLoader {
-	return PluginLoader{}
-}
-
-func (loader PluginLoader) LoadPlugin(pluginPath string) common.Component {
 	plug, err := plugin.Open(pluginPath)
 	if err != nil {
 		log.Printf("Failed to load plugin '%s': %s", pluginPath, err)
 		return nil
 	}
 
+	// Lookup component symbol
 	sym, err := plug.Lookup("Component")
 	if err != nil {
 		log.Printf("Failed to load plugin '%s': failed to get Component: %s", pluginPath, err)
 		return nil
 	}
 
+	// Validate component type
 	var component common.Component
 	component, ok := sym.(common.Component)
 	if !ok {
@@ -36,7 +34,8 @@ func (loader PluginLoader) LoadPlugin(pluginPath string) common.Component {
 	return component
 }
 
-func (loader PluginLoader) LoadPlugins(directory string) []common.Component {
+// LoadPlugins loads all plugins and componenets in a directory
+func LoadPlugins(directory string) []common.Component {
 
 	paths, err := os.ReadDir(directory)
 	if err != nil {
@@ -50,7 +49,7 @@ func (loader PluginLoader) LoadPlugins(directory string) []common.Component {
 			continue
 		}
 
-		if comp := loader.LoadPlugin(path.Name()); comp != nil {
+		if comp := LoadPlugin(path.Name()); comp != nil {
 			components = append(components, comp)
 		}
 	}

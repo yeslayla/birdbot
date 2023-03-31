@@ -10,8 +10,8 @@ import (
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/yeslayla/birdbot/app"
+	"github.com/yeslayla/birdbot/components"
 	"github.com/yeslayla/birdbot/core"
-	"github.com/yeslayla/birdbot/events"
 )
 
 const PluginsDirectory = "./plugins"
@@ -59,18 +59,17 @@ func main() {
 	loader := app.NewComponentLoader(bot)
 
 	if cfg.Features.AnnounceEvents.IsEnabledByDefault() {
-		loader.LoadComponent(events.NewAnnounceEventsComponent(bot.Mastodon, cfg.Discord.NotificationChannel))
+		loader.LoadComponent(components.NewAnnounceEventsComponent(bot.Mastodon, cfg.Discord.NotificationChannel))
 	}
 	if cfg.Features.ManageEventChannels.IsEnabledByDefault() {
-		loader.LoadComponent(events.NewManageEventChannelsComponent(cfg.Discord.EventCategory, cfg.Discord.ArchiveCategory, bot.Session))
+		loader.LoadComponent(components.NewManageEventChannelsComponent(cfg.Discord.EventCategory, cfg.Discord.ArchiveCategory, bot.Session))
 	}
 	if cfg.Features.ReccurringEvents.IsEnabledByDefault() {
-		loader.LoadComponent(events.NewRecurringEventsComponent())
+		loader.LoadComponent(components.NewRecurringEventsComponent())
 	}
 
 	if _, err := os.Stat(PluginsDirectory); !os.IsNotExist(err) {
-		pluginLoader := app.NewPluginLoader()
-		components := pluginLoader.LoadPlugins(PluginsDirectory)
+		components := app.LoadPlugins(PluginsDirectory)
 		for _, comp := range components {
 			loader.LoadComponent(comp)
 		}

@@ -2,6 +2,7 @@ package common
 
 import "fmt"
 
+// User represents a user within BirdBot
 type User struct {
 	ID          string
 	AvatarURL   string

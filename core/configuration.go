@@ -2,12 +2,14 @@ package core
 
 import "strings"
 
+// Config is used to modify the behavior of birdbot externally
 type Config struct {
 	Discord  DiscordConfig  `yaml:"discord"`
 	Mastodon MastodonConfig `yaml:"mastodon"`
 	Features Features       `yaml:"features"`
 }
 
+// DiscordConfig contains discord specific configuration
 type DiscordConfig struct {
 	Token   string `yaml:"token" env:"DISCORD_TOKEN"`
 	GuildID string `yaml:"guild_id" env:"DISCORD_GUILD_ID"`
@@ -17,6 +19,7 @@ type DiscordConfig struct {
 	NotificationChannel string `yaml:"notification_channel" env:"DISCORD_NOTIFICATION_CHANNEL"`
 }
 
+// MastodonConfig contains mastodon specific configuration
 type MastodonConfig struct {
 	Server       string `yaml:"server" env:"MASTODON_SERVER"`
 	Username     string `yaml:"user" env:"MASTODON_USER"`
@@ -25,6 +28,7 @@ type MastodonConfig struct {
 	ClientSecret string `yaml:"client_secret" env:"MASTODON_CLIENT_SECRET"`
 }
 
+// Features contains all features flags that can be used to modify functionality
 type Features struct {
 	ManageEventChannels Feature `yaml:"manage_event_channels" env:"BIRD_EVENT_CHANNELS"`
 	AnnounceEvents      Feature `yaml:"announce_events" env:"BIRD_ANNOUNCE_EVENTS"`
@@ -32,12 +36,16 @@ type Features struct {
 	LoadGamePlugins     Feature `yaml:"load_game_plugins" env:"BIRD_LOAD_GAME_PLUGINS"`
 }
 
+// Feature is a boolean string used to toggle functionality
 type Feature string
 
+// IsEnabled returns true when a feature is set to be true
 func (value Feature) IsEnabled() bool {
 	return strings.ToLower(string(value)) == "true"
 }
 
+// IsEnabled returns true when a feature is set to be true
+// or if the feature flag is not set at all
 func (value Feature) IsEnabledByDefault() bool {
 	v := strings.ToLower(string(value))
 	if v == "" {

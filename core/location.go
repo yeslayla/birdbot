@@ -5,13 +5,14 @@ import (
 	"strings"
 )
 
-const REMOTE_LOCATION string = "online"
+// RemoteLocation is the string used to identify a online event
+const RemoteLocation string = "online"
 
 // GetCityFromLocation returns the city name of an event's location
 func GetCityFromLocation(location string) string {
 
-	if location == REMOTE_LOCATION {
-		return fmt.Sprint("-", REMOTE_LOCATION)
+	if location == RemoteLocation {
+		return fmt.Sprint("-", RemoteLocation)
 	}
 	parts := strings.Split(location, " ")
 	index := -1

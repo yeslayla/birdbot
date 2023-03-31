@@ -15,6 +15,7 @@ type Channel struct {
 	Verified bool
 }
 
+// GenerateEventChannelName deciphers a channel name from a given set of event data
 func GenerateEventChannelName(eventName string, location string, dateTime time.Time) string {
 	month := GetMonthPrefix(dateTime)
 	day := dateTime.Day()
@@ -31,8 +32,8 @@ func GenerateEventChannelName(eventName string, location string, dateTime time.T
 	return channel
 }
 
-// GenerateChannel returns a channel object associated with an event
-func GenerateChannel(event common.Event) *Channel {
+// GenerateChannelFromEvent returns a channel object associated with an event
+func GenerateChannelFromEvent(event common.Event) *Channel {
 
 	channelName := GenerateEventChannelName(event.Name, event.Location, event.DateTime)
 

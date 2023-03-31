@@ -157,6 +157,7 @@ func (app *Bot) onEventComplete(d *discord.Discord, event common.Event) {
 
 }
 
+// NewBot creates a new bot instance
 func NewBot() *Bot {
 	return &Bot{}
 }

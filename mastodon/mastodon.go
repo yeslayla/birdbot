@@ -11,6 +11,7 @@ type Mastodon struct {
 	client *mastodon.Client
 }
 
+// NewMastodon initializes a new Mastodon client
 func NewMastodon(server string, clientID string, clientSecret string, username string, password string) *Mastodon {
 	m := &Mastodon{}
 
