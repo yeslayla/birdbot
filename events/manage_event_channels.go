@@ -9,14 +9,16 @@ import (
 )
 
 type ManageEventChannelsComponent struct {
-	session    *discord.Discord
-	categoryID string
+	session           *discord.Discord
+	categoryID        string
+	archiveCategoryID string
 }
 
-func NewManageEventChannelsComponent(categoryID string, session *discord.Discord) *ManageEventChannelsComponent {
+func NewManageEventChannelsComponent(categoryID string, archiveCategoryID string, session *discord.Discord) *ManageEventChannelsComponent {
 	return &ManageEventChannelsComponent{
-		session:    session,
-		categoryID: categoryID,
+		session:           session,
+		categoryID:        categoryID,
+		archiveCategoryID: archiveCategoryID,
 	}
 }
 
@@ -54,9 +56,9 @@ func (c *ManageEventChannelsComponent) OnEventDelete(e common.Event) error {
 func (c *ManageEventChannelsComponent) OnEventComplete(e common.Event) error {
 	channel := core.GenerateChannel(e)
 
-	if c.categoryID != "" {
+	if c.archiveCategoryID != "" {
 
-		if err := c.session.MoveChannelToCategory(channel, c.categoryID); err != nil {
+		if err := c.session.MoveChannelToCategory(channel, c.archiveCategoryID); err != nil {
 			log.Print("Failed to move channel to archive category: ", err)
 		}
 

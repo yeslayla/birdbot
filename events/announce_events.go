@@ -24,6 +24,7 @@ func (c *AnnounceEventsComponent) Initialize(birdbot common.ComponentManager) er
 	c.bot = birdbot
 
 	_ = birdbot.OnEventCreate(c.OnEventCreate)
+	_ = birdbot.OnEventDelete(c.OnEventDelete)
 
 	return nil
 }

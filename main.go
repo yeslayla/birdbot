@@ -14,6 +14,8 @@ import (
 	"github.com/yeslayla/birdbot/events"
 )
 
+const PluginsDirectory = "./plugins"
+
 func main() {
 
 	configDir, _ := os.UserConfigDir()
@@ -56,14 +58,22 @@ func main() {
 
 	loader := app.NewComponentLoader(bot)
 
-	if cfg.Features.AnnounceEvents {
+	if cfg.Features.AnnounceEvents.IsEnabledByDefault() {
 		loader.LoadComponent(events.NewAnnounceEventsComponent(bot.Mastodon, cfg.Discord.NotificationChannel))
 	}
-	if cfg.Features.ManageEventChannels {
-		loader.LoadComponent(events.NewManageEventChannelsComponent(cfg.Discord.EventCategory, bot.Session))
+	if cfg.Features.ManageEventChannels.IsEnabledByDefault() {
+		loader.LoadComponent(events.NewManageEventChannelsComponent(cfg.Discord.EventCategory, cfg.Discord.ArchiveCategory, bot.Session))
 	}
-	if cfg.Features.ReccurringEvents {
+	if cfg.Features.ReccurringEvents.IsEnabledByDefault() {
 		loader.LoadComponent(events.NewRecurringEventsComponent())
+	}
+
+	if _, err := os.Stat(PluginsDirectory); !os.IsNotExist(err) {
+		pluginLoader := app.NewPluginLoader()
+		components := pluginLoader.LoadPlugins(PluginsDirectory)
+		for _, comp := range components {
+			loader.LoadComponent(comp)
+		}
 	}
 
 	if err := bot.Run(); err != nil {

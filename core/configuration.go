@@ -1,5 +1,7 @@
 package core
 
+import "strings"
+
 type Config struct {
 	Discord  DiscordConfig  `yaml:"discord"`
 	Mastodon MastodonConfig `yaml:"mastodon"`
@@ -24,8 +26,22 @@ type MastodonConfig struct {
 }
 
 type Features struct {
-	ManageEventChannels bool `yaml:"manage_event_channels" env:"BIRD_EVENT_CHANNELS" env-default:"true"`
-	AnnounceEvents      bool `yaml:"announce_events" env:"BIRD_ANNOUNCE_EVENTS" env-default:"true"`
-	ReccurringEvents    bool `yaml:"recurring_events" env:"BIRD_RECURRING_EVENTS" env-default:"true"`
-	LoadGamePlugins     bool `yaml:"load_game_plugins" env:"BIRD_LOAD_GAME_PLUGINS" env-default:"true"`
+	ManageEventChannels Feature `yaml:"manage_event_channels" env:"BIRD_EVENT_CHANNELS"`
+	AnnounceEvents      Feature `yaml:"announce_events" env:"BIRD_ANNOUNCE_EVENTS"`
+	ReccurringEvents    Feature `yaml:"recurring_events" env:"BIRD_RECURRING_EVENTS"`
+	LoadGamePlugins     Feature `yaml:"load_game_plugins" env:"BIRD_LOAD_GAME_PLUGINS"`
+}
+
+type Feature string
+
+func (value Feature) IsEnabled() bool {
+	return strings.ToLower(string(value)) == "true"
+}
+
+func (value Feature) IsEnabledByDefault() bool {
+	v := strings.ToLower(string(value))
+	if v == "" {
+		v = "true"
+	}
+	return Feature(v).IsEnabled()
 }

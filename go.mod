@@ -1,6 +1,6 @@
 module github.com/yeslayla/birdbot
 
-go 1.19
+go 1.20
 
 require (
 	github.com/bwmarrin/discordgo v0.26.1
@@ -13,6 +13,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
+	github.com/magefile/mage v1.14.0 // indirect
 	github.com/mattn/go-mastodon v0.0.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
