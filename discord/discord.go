@@ -8,7 +8,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/stretchr/testify/mock"
-	"github.com/yeslayla/birdbot/core"
+	"github.com/yeslayla/birdbot/common"
 )
 
 type Discord struct {
@@ -64,7 +64,7 @@ func (discord *Discord) OnReady(handler func(*Discord)) {
 }
 
 // OnEventCreate registers a handler when a guild scheduled event is created
-func (discord *Discord) OnEventCreate(handler func(*Discord, *core.Event)) {
+func (discord *Discord) OnEventCreate(handler func(*Discord, common.Event)) {
 	discord.session.AddHandler(func(s *discordgo.Session, r *discordgo.GuildScheduledEventCreate) {
 		if r.GuildID != discord.guildID {
 			return
@@ -75,7 +75,7 @@ func (discord *Discord) OnEventCreate(handler func(*Discord, *core.Event)) {
 }
 
 // OnEventDelete registers a handler when a guild scheduled event is deleted
-func (discord *Discord) OnEventDelete(handler func(*Discord, *core.Event)) {
+func (discord *Discord) OnEventDelete(handler func(*Discord, common.Event)) {
 	discord.session.AddHandler(func(s *discordgo.Session, r *discordgo.GuildScheduledEventDelete) {
 		if r.GuildID != discord.guildID {
 			return
@@ -86,7 +86,7 @@ func (discord *Discord) OnEventDelete(handler func(*Discord, *core.Event)) {
 }
 
 // OnEventUpdate registers a handler when a guild scheduled event is updated
-func (discord *Discord) OnEventUpdate(handler func(*Discord, *core.Event)) {
+func (discord *Discord) OnEventUpdate(handler func(*Discord, common.Event)) {
 	discord.session.AddHandler(func(s *discordgo.Session, r *discordgo.GuildScheduledEventUpdate) {
 		if r.GuildID != discord.guildID {
 			return

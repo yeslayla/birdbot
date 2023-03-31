@@ -3,6 +3,7 @@ package core
 type Config struct {
 	Discord  DiscordConfig  `yaml:"discord"`
 	Mastodon MastodonConfig `yaml:"mastodon"`
+	Features Features       `yaml:"features"`
 }
 
 type DiscordConfig struct {
@@ -20,4 +21,11 @@ type MastodonConfig struct {
 	Password     string `yaml:"password" env:"MASTODON_PASSWORD"`
 	ClientID     string `yaml:"client_id" env:"MASTODON_CLIENT_ID"`
 	ClientSecret string `yaml:"client_secret" env:"MASTODON_CLIENT_SECRET"`
+}
+
+type Features struct {
+	ManageEventChannels bool `yaml:"manage_event_channels" env:"BIRD_EVENT_CHANNELS" env-default:"true"`
+	AnnounceEvents      bool `yaml:"announce_events" env:"BIRD_ANNOUNCE_EVENTS" env-default:"true"`
+	ReccurringEvents    bool `yaml:"recurring_events" env:"BIRD_RECURRING_EVENTS" env-default:"true"`
+	LoadGamePlugins     bool `yaml:"load_game_plugins" env:"BIRD_LOAD_GAME_PLUGINS" env-default:"true"`
 }

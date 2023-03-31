@@ -4,27 +4,28 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/yeslayla/birdbot/common"
 	"github.com/yeslayla/birdbot/core"
 )
 
 // NewEvent converts a discordgo.GuildScheduledEvent to birdbot event
-func NewEvent(guildEvent *discordgo.GuildScheduledEvent) *core.Event {
-	event := &core.Event{
+func NewEvent(guildEvent *discordgo.GuildScheduledEvent) common.Event {
+	event := common.Event{
 		Name:        guildEvent.Name,
 		Description: guildEvent.Description,
 		ID:          guildEvent.ID,
-		Organizer: &core.User{
+		Organizer: common.User{
 			ID: guildEvent.CreatorID,
 		},
 		DateTime: guildEvent.ScheduledStartTime,
-		Image:    guildEvent.Image,
+		ImageURL: guildEvent.Image,
 	}
 
 	if guildEvent.ScheduledEndTime != nil {
-		event.CompleteTime = *guildEvent.ScheduledEndTime
+		event.CompleteDateTime = *guildEvent.ScheduledEndTime
 	} else {
 		year, month, day := guildEvent.ScheduledStartTime.Date()
-		event.CompleteTime = time.Date(year, month, day, 0, 0, 0, 0, guildEvent.ScheduledStartTime.Location())
+		event.CompleteDateTime = time.Date(year, month, day, 0, 0, 0, 0, guildEvent.ScheduledStartTime.Location())
 	}
 
 	event.Completed = guildEvent.Status == discordgo.GuildScheduledEventStatusCompleted
@@ -38,14 +39,14 @@ func NewEvent(guildEvent *discordgo.GuildScheduledEvent) *core.Event {
 	return event
 }
 
-func (discord *Discord) CreateEvent(event *core.Event) error {
+func (discord *Discord) CreateEvent(event common.Event) error {
 
 	params := &discordgo.GuildScheduledEventParams{
 		Name:               event.Name,
 		Description:        event.Description,
 		ScheduledStartTime: &event.DateTime,
-		ScheduledEndTime:   &event.CompleteTime,
-		Image:              event.Image,
+		ScheduledEndTime:   &event.CompleteDateTime,
+		Image:              event.ImageURL,
 		EntityType:         discordgo.GuildScheduledEventEntityTypeExternal,
 		PrivacyLevel:       discordgo.GuildScheduledEventPrivacyLevelGuildOnly,
 	}

@@ -1,13 +1,10 @@
 package app
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	"os"
-	"strings"
 
-	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/yeslayla/birdbot/common"
 	"github.com/yeslayla/birdbot/core"
 	"github.com/yeslayla/birdbot/discord"
 	"github.com/yeslayla/birdbot/mastodon"
@@ -17,34 +14,29 @@ var Version string
 var Build string
 
 type Bot struct {
-	session  *discord.Discord
-	mastodon *mastodon.Mastodon
+	Session  *discord.Discord
+	Mastodon *mastodon.Mastodon
 
 	// Discord Objects
 	guildID               string
 	eventCategoryID       string
 	archiveCategoryID     string
 	notificationChannelID string
+
+	onReadyHandlers  [](func() error)
+	onNotifyHandlers [](func(string) error)
+
+	onEventCreatedHandlers   [](func(common.Event) error)
+	onEventDeletedHandlers   [](func(common.Event) error)
+	onEventUpdatedHandlers   [](func(common.Event) error)
+	onEventCompletedHandlers [](func(common.Event) error)
+
+	gameModules []common.GameModule
 }
 
 // Initalize creates the discord session and registers handlers
-func (app *Bot) Initialize(config_path string) error {
-	log.Printf("Using config: %s", config_path)
-	cfg := &core.Config{}
+func (app *Bot) Initialize(cfg *core.Config) error {
 
-	_, err := os.Stat(config_path)
-	if errors.Is(err, os.ErrNotExist) {
-		log.Printf("Config file not found: '%s'", config_path)
-		err := cleanenv.ReadEnv(cfg)
-		if err != nil {
-			return err
-		}
-	} else {
-		err := cleanenv.ReadConfig(config_path, cfg)
-		if err != nil {
-			return err
-		}
-	}
 	// Load directly from config
 	app.guildID = cfg.Discord.GuildID
 	app.eventCategoryID = cfg.Discord.EventCategory
@@ -58,30 +50,30 @@ func (app *Bot) Initialize(config_path string) error {
 	if cfg.Mastodon.ClientID != "" && cfg.Mastodon.ClientSecret != "" &&
 		cfg.Mastodon.Username != "" && cfg.Mastodon.Password != "" &&
 		cfg.Mastodon.Server != "" {
-		app.mastodon = mastodon.NewMastodon(cfg.Mastodon.Server, cfg.Mastodon.ClientID, cfg.Mastodon.ClientSecret,
+		app.Mastodon = mastodon.NewMastodon(cfg.Mastodon.Server, cfg.Mastodon.ClientID, cfg.Mastodon.ClientSecret,
 			cfg.Mastodon.Username, cfg.Mastodon.Password)
 	}
 
-	app.session = discord.New(app.guildID, cfg.Discord.Token)
+	app.Session = discord.New(app.guildID, cfg.Discord.Token)
 
 	// Register Event Handlers
-	app.session.OnReady(app.onReady)
-	app.session.OnEventCreate(app.onEventCreate)
-	app.session.OnEventDelete(app.onEventDelete)
-	app.session.OnEventUpdate(app.onEventUpdate)
+	app.Session.OnReady(app.onReady)
+	app.Session.OnEventCreate(app.onEventCreate)
+	app.Session.OnEventDelete(app.onEventDelete)
+	app.Session.OnEventUpdate(app.onEventUpdate)
 
 	return nil
 }
 
 // Run opens the session with Discord until exit
 func (app *Bot) Run() error {
-	return app.session.Run()
+	return app.Session.Run()
 }
 
 // Stop triggers a graceful shutdown of the app
 func (app *Bot) Stop() {
 	log.Print("Shuting down...")
-	app.session.Stop()
+	app.Session.Stop()
 }
 
 // Notify sends a message to the notification channe;
@@ -93,110 +85,76 @@ func (app *Bot) Notify(message string) {
 
 	log.Print("Notification: ", message)
 
-	channel := app.session.NewChannelFromID(app.notificationChannelID)
+	channel := app.Session.NewChannelFromID(app.notificationChannelID)
 	if channel == nil {
 		log.Printf("Failed notification: channel was not found with ID '%v'", app.notificationChannelID)
 	}
 
-	err := app.session.SendMessage(channel, message)
+	err := app.Session.SendMessage(channel, message)
 	if err != nil {
 		log.Print("Failed notification: ", err)
+	}
+
+	for _, handler := range app.onNotifyHandlers {
+		if err := handler(message); err != nil {
+			log.Println(err)
+		}
 	}
 }
 
 func (app *Bot) onReady(d *discord.Discord) {
-	app.session.SetStatus(fmt.Sprintf("with fire! (%s)", Version))
+	app.Session.SetStatus(fmt.Sprintf("with fire! (%s)", Version))
+
+	for _, handler := range app.onReadyHandlers {
+		if err := handler(); err != nil {
+			log.Println(err)
+		}
+	}
 }
 
-func (app *Bot) onEventCreate(d *discord.Discord, event *core.Event) {
+func (app *Bot) onEventCreate(d *discord.Discord, event common.Event) {
 
 	log.Print("Event Created: '", event.Name, "':'", event.Location, "'")
-
-	channel, err := app.session.NewChannelFromName(event.Channel().Name)
-	if err != nil {
-		log.Print("Failed to create channel for event: ", err)
-	}
-
-	if app.eventCategoryID != "" {
-		err = app.session.MoveChannelToCategory(channel, app.eventCategoryID)
-		if err != nil {
-			log.Printf("Failed to move channel to events category '%s': %v", channel.Name, err)
+	for _, handler := range app.onEventCreatedHandlers {
+		if err := handler(event); err != nil {
+			log.Println(err)
 		}
 	}
 
-	eventURL := fmt.Sprintf("https://discordapp.com/events/%s/%s", app.guildID, event.ID)
-	app.Notify(fmt.Sprintf("%s is organizing an event '%s': %s", event.Organizer.Mention(), event.Name, eventURL))
-
-	if app.mastodon != nil {
-		err = app.mastodon.Toot(fmt.Sprintf("A new event has been organized '%s': %s", event.Name, eventURL))
-		if err != nil {
-			fmt.Println("Failed to send Mastodon Toot:", err)
-		}
-	}
 }
 
-func (app *Bot) onEventDelete(d *discord.Discord, event *core.Event) {
+func (app *Bot) onEventDelete(d *discord.Discord, event common.Event) {
 
-	_, err := app.session.DeleteChannel(event.Channel())
-	if err != nil {
-		log.Print("Failed to create channel for event: ", err)
-	}
-
-	app.Notify(fmt.Sprintf("%s cancelled '%s' on %s, %d!", event.Organizer.Mention(), event.Name, event.DateTime.Month().String(), event.DateTime.Day()))
-
-	if app.mastodon != nil {
-		err = app.mastodon.Toot(fmt.Sprintf("'%s' cancelled on %s, %d!", event.Name, event.DateTime.Month().String(), event.DateTime.Day()))
-		if err != nil {
-			fmt.Println("Failed to send Mastodon Toot:", err)
+	for _, handler := range app.onEventDeletedHandlers {
+		if err := handler(event); err != nil {
+			log.Println(err)
 		}
 	}
+
 }
 
-func (app *Bot) onEventUpdate(d *discord.Discord, event *core.Event) {
+func (app *Bot) onEventUpdate(d *discord.Discord, event common.Event) {
+
+	for _, handler := range app.onEventUpdatedHandlers {
+		if err := handler(event); err != nil {
+			log.Println(err)
+		}
+	}
+
 	// Pass event onwards
 	if event.Completed {
 		app.onEventComplete(d, event)
 	}
 }
 
-func (app *Bot) onEventComplete(d *discord.Discord, event *core.Event) {
+func (app *Bot) onEventComplete(d *discord.Discord, event common.Event) {
 
-	channel := event.Channel()
-
-	if app.archiveCategoryID != "" {
-
-		if err := app.session.MoveChannelToCategory(channel, app.archiveCategoryID); err != nil {
-			log.Print("Failed to move channel to archive category: ", err)
-		}
-
-		if err := app.session.ArchiveChannel(channel); err != nil {
-			log.Print("Failed to archive channel: ", err)
-		}
-
-		log.Printf("Archived channel: '%s'", channel.Name)
-
-	} else {
-
-		// Delete Channel
-		_, err := app.session.DeleteChannel(channel)
-		if err != nil {
-			log.Print("Failed to delete channel: ", err)
-		}
-
-		log.Printf("Deleted channel: '%s'", channel.Name)
-	}
-
-	if strings.Contains(strings.ToLower(event.Description), "recurring weekly") {
-		startTime := event.DateTime.AddDate(0, 0, 7)
-		finishTime := event.CompleteTime.AddDate(0, 0, 7)
-		nextEvent := event
-		nextEvent.DateTime = startTime
-		nextEvent.CompleteTime = finishTime
-
-		if err := app.session.CreateEvent(nextEvent); err != nil {
-			log.Print("Failed to create recurring event: ", err)
+	for _, handler := range app.onEventCompletedHandlers {
+		if err := handler(event); err != nil {
+			log.Println(err)
 		}
 	}
+
 }
 
 func NewBot() *Bot {
