@@ -1,12 +1,12 @@
 package common
 
-type Component interface {
-	Initialize(birdbot ComponentManager) error
+type Module interface {
+	Initialize(birdbot ModuleManager) error
 }
 
-// ComponentManager is the primary way for a component to interact with BirdBot
+// ModuleManager is the primary way for a module to interact with BirdBot
 // by listening to events and committing actions
-type ComponentManager interface {
+type ModuleManager interface {
 	OnReady(func() error) error
 
 	OnNotify(func(string) error) error
@@ -21,5 +21,5 @@ type ComponentManager interface {
 	CreateEvent(event Event) error
 	Notify(message string) error
 
-	RegisterGameModule(ID string, plugin GameModule) error
+	RegisterChatSyncModule(ID string, plugin ChatSyncModule) error
 }

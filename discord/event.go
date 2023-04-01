@@ -39,6 +39,7 @@ func NewEvent(guildEvent *discordgo.GuildScheduledEvent) common.Event {
 	return event
 }
 
+// CreateEvent creates a new discord event
 func (discord *Discord) CreateEvent(event common.Event) error {
 
 	params := &discordgo.GuildScheduledEventParams{

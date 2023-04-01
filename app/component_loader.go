@@ -17,7 +17,7 @@ func NewComponentLoader(bot *Bot) *ComponentLoader {
 	}
 }
 
-func (loader *ComponentLoader) LoadComponent(component common.Component) {
+func (loader *ComponentLoader) LoadComponent(component common.Module) {
 	if err := component.Initialize(loader); err != nil {
 		log.Print("Failed to load component: ", err)
 	}
@@ -50,7 +50,7 @@ func (loader *ComponentLoader) OnEventComplete(handler func(common.Event) error)
 	return nil
 }
 
-func (loader *ComponentLoader) RegisterGameModule(ID string, plugin common.GameModule) error {
+func (loader *ComponentLoader) RegisterChatSyncModule(ID string, plugin common.ChatSyncModule) error {
 	return fmt.Errorf("unimplemented")
 }
 

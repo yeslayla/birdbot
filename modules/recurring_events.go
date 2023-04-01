@@ -1,4 +1,4 @@
-package components
+package modules
 
 import (
 	"log"
@@ -8,24 +8,24 @@ import (
 	"github.com/yeslayla/birdbot/discord"
 )
 
-type recurringEventsComponent struct {
+type recurringEventsModule struct {
 	session *discord.Discord
 }
 
 // NewRecurringEventsComponent creates a new component instance
-func NewRecurringEventsComponent() common.Component {
-	return &recurringEventsComponent{}
+func NewRecurringEventsComponent() common.Module {
+	return &recurringEventsModule{}
 }
 
 // Initialize registers event listeners
-func (c *recurringEventsComponent) Initialize(birdbot common.ComponentManager) error {
+func (c *recurringEventsModule) Initialize(birdbot common.ModuleManager) error {
 	_ = birdbot.OnEventComplete(c.OnEventComplete)
 
 	return nil
 }
 
 // OnEventComplete checks for keywords before creating a new event
-func (c *recurringEventsComponent) OnEventComplete(e common.Event) error {
+func (c *recurringEventsModule) OnEventComplete(e common.Event) error {
 
 	if strings.Contains(strings.ToLower(e.Description), "recurring weekly") {
 		startTime := e.DateTime.AddDate(0, 0, 7)
