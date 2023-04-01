@@ -1,5 +1,7 @@
 FROM ubuntu:22.04
 
+RUN apt update -y
+
 COPY build/birdbot /usr/bin/birdbot
 
 VOLUME /etc/birdbot
