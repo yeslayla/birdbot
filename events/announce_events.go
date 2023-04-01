@@ -1,4 +1,4 @@
-package components
+package events
 
 import (
 	"fmt"
@@ -8,13 +8,13 @@ import (
 )
 
 type announceEventsComponent struct {
-	bot      common.ComponentManager
+	bot      common.ModuleManager
 	mastodon *mastodon.Mastodon
 	guildID  string
 }
 
 // NewAnnounceEventsComponent creates a new component
-func NewAnnounceEventsComponent(mastodon *mastodon.Mastodon, guildID string) common.Component {
+func NewAnnounceEventsComponent(mastodon *mastodon.Mastodon, guildID string) common.Module {
 	return &announceEventsComponent{
 		mastodon: mastodon,
 		guildID:  guildID,
@@ -22,7 +22,7 @@ func NewAnnounceEventsComponent(mastodon *mastodon.Mastodon, guildID string) com
 }
 
 // Initialize registers event listeners
-func (c *announceEventsComponent) Initialize(birdbot common.ComponentManager) error {
+func (c *announceEventsComponent) Initialize(birdbot common.ModuleManager) error {
 	c.bot = birdbot
 
 	_ = birdbot.OnEventCreate(c.OnEventCreate)

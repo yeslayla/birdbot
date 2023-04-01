@@ -1,6 +1,6 @@
 package common
 
-type GameModule interface {
+type ChatSyncModule interface {
 	SendMessage(user string, message string)
 	RecieveMessage(user User, message string)
 }

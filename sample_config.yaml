@@ -10,6 +10,17 @@ discord:
   archive_category: ""
   notification_channel: ""
 
+  # # Configure role selection
+  # role_selection:
+  # - title: "SELECTION TITLE"
+  #   description: "SELECTION DESCRIPTION"
+  #   discord_channel: ""
+  #   roles:
+  #   - name: Red
+  #     color: "#f64c38"
+  #   - name: Blue
+  #     color: "#1a88ff"
+
 
 # mastodon:
 #   server: https://mastodon.social
@@ -17,3 +28,11 @@ discord:
 #   password: secret
 #   client_id: 1234
 #   client_secret: secret2
+
+# # Feature flags can be used to
+# # disable specific features
+# features:
+#   manage_event_channels: true
+#   announce_events: true
+#   recurring_events: true
+#   role_selection: true

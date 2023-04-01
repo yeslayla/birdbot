@@ -9,6 +9,7 @@ Bird Bot is a discord bot for managing and organizing events for a small discord
 - Delete text channels after events
 - Archive text channels after events
 - Create recurring weekly events
+- Role selection
 
 ## Usage
 
@@ -16,7 +17,7 @@ To get up and running, install go and you can run `make run`!
 
 ## Using Docker
 
-The container is expecting the config file to be located at `/etc/birdbot/birdbot.yaml`. The easily solution here is to mount the conifg with a volume.
+The container is expecting the config file to be located at `/etc/birdbot/birdbot.yaml`. The easily solution here is to mount the config with a volume.
 
 Example: 
 ```bash

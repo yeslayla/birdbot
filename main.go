@@ -10,8 +10,8 @@ import (
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/yeslayla/birdbot/app"
-	"github.com/yeslayla/birdbot/components"
 	"github.com/yeslayla/birdbot/core"
+	"github.com/yeslayla/birdbot/modules"
 )
 
 const PluginsDirectory = "./plugins"
@@ -59,13 +59,19 @@ func main() {
 	loader := app.NewComponentLoader(bot)
 
 	if cfg.Features.AnnounceEvents.IsEnabledByDefault() {
-		loader.LoadComponent(components.NewAnnounceEventsComponent(bot.Mastodon, cfg.Discord.NotificationChannel))
+		loader.LoadComponent(modules.NewAnnounceEventsComponent(bot.Mastodon, cfg.Discord.NotificationChannel))
 	}
 	if cfg.Features.ManageEventChannels.IsEnabledByDefault() {
-		loader.LoadComponent(components.NewManageEventChannelsComponent(cfg.Discord.EventCategory, cfg.Discord.ArchiveCategory, bot.Session))
+		loader.LoadComponent(modules.NewManageEventChannelsComponent(cfg.Discord.EventCategory, cfg.Discord.ArchiveCategory, bot.Session))
 	}
 	if cfg.Features.ReccurringEvents.IsEnabledByDefault() {
-		loader.LoadComponent(components.NewRecurringEventsComponent())
+		loader.LoadComponent(modules.NewRecurringEventsComponent())
+	}
+
+	if cfg.Features.RoleSelection.IsEnabledByDefault() {
+		for _, v := range cfg.Discord.RoleSelections {
+			loader.LoadComponent(modules.NewRoleSelectionComponent(bot.Session, v))
+		}
 	}
 
 	if _, err := os.Stat(PluginsDirectory); !os.IsNotExist(err) {

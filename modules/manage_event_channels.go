@@ -1,4 +1,4 @@
-package components
+package modules
 
 import (
 	"log"
@@ -8,15 +8,15 @@ import (
 	"github.com/yeslayla/birdbot/discord"
 )
 
-type manageEventChannelsComponent struct {
+type manageEventChannelsModule struct {
 	session           *discord.Discord
 	categoryID        string
 	archiveCategoryID string
 }
 
 // NewManageEventChannelsComponent creates a new component
-func NewManageEventChannelsComponent(categoryID string, archiveCategoryID string, session *discord.Discord) common.Component {
-	return &manageEventChannelsComponent{
+func NewManageEventChannelsComponent(categoryID string, archiveCategoryID string, session *discord.Discord) common.Module {
+	return &manageEventChannelsModule{
 		session:           session,
 		categoryID:        categoryID,
 		archiveCategoryID: archiveCategoryID,
@@ -24,7 +24,7 @@ func NewManageEventChannelsComponent(categoryID string, archiveCategoryID string
 }
 
 // Initialize registers event listeners
-func (c *manageEventChannelsComponent) Initialize(birdbot common.ComponentManager) error {
+func (c *manageEventChannelsModule) Initialize(birdbot common.ModuleManager) error {
 	_ = birdbot.OnEventCreate(c.OnEventCreate)
 	_ = birdbot.OnEventComplete(c.OnEventComplete)
 	_ = birdbot.OnEventDelete(c.OnEventDelete)
@@ -33,7 +33,7 @@ func (c *manageEventChannelsComponent) Initialize(birdbot common.ComponentManage
 }
 
 // OnEventCreate creates a new channel for an event and moves it to a given category
-func (c *manageEventChannelsComponent) OnEventCreate(e common.Event) error {
+func (c *manageEventChannelsModule) OnEventCreate(e common.Event) error {
 	channel, err := c.session.NewChannelFromName(core.GenerateChannelFromEvent(e).Name)
 	if err != nil {
 		log.Print("Failed to create channel for event: ", err)
@@ -49,7 +49,7 @@ func (c *manageEventChannelsComponent) OnEventCreate(e common.Event) error {
 }
 
 // OnEventDelete deletes the channel associated with the given event
-func (c *manageEventChannelsComponent) OnEventDelete(e common.Event) error {
+func (c *manageEventChannelsModule) OnEventDelete(e common.Event) error {
 	_, err := c.session.DeleteChannel(core.GenerateChannelFromEvent(e))
 	if err != nil {
 		log.Print("Failed to create channel for event: ", err)
@@ -59,7 +59,7 @@ func (c *manageEventChannelsComponent) OnEventDelete(e common.Event) error {
 
 // OnEventComplete archives a given event channel if not given
 // an archive category will delete the channel instead
-func (c *manageEventChannelsComponent) OnEventComplete(e common.Event) error {
+func (c *manageEventChannelsModule) OnEventComplete(e common.Event) error {
 	channel := core.GenerateChannelFromEvent(e)
 
 	if c.archiveCategoryID != "" {

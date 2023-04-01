@@ -17,6 +17,21 @@ type DiscordConfig struct {
 	EventCategory       string `yaml:"event_category" env:"DISCORD_EVENT_CATEGORY"`
 	ArchiveCategory     string `yaml:"archive_category" env:"DISCORD_ARCHIVE_CATEGORY"`
 	NotificationChannel string `yaml:"notification_channel" env:"DISCORD_NOTIFICATION_CHANNEL"`
+
+	RoleSelections []RoleSelectionConfig `yaml:"role_selection"`
+}
+
+type RoleSelectionConfig struct {
+	Title       string `yaml:"title"`
+	Description string `yaml:"description"`
+
+	SelectionChannel string       `yaml:"discord_channel"`
+	Roles            []RoleConfig `yaml:"roles"`
+}
+
+type RoleConfig struct {
+	RoleName string `yaml:"name"`
+	Color    string `yaml:"color"`
 }
 
 // MastodonConfig contains mastodon specific configuration
@@ -33,6 +48,7 @@ type Features struct {
 	ManageEventChannels Feature `yaml:"manage_event_channels" env:"BIRD_EVENT_CHANNELS"`
 	AnnounceEvents      Feature `yaml:"announce_events" env:"BIRD_ANNOUNCE_EVENTS"`
 	ReccurringEvents    Feature `yaml:"recurring_events" env:"BIRD_RECURRING_EVENTS"`
+	RoleSelection       Feature `yaml:"role_selection" env:"BIRD_ROLE_SELECTION"`
 	LoadGamePlugins     Feature `yaml:"load_game_plugins" env:"BIRD_LOAD_GAME_PLUGINS"`
 }
 

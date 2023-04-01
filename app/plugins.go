@@ -9,7 +9,7 @@ import (
 )
 
 // LoadPlugin loads a plugin and returns its component if successful
-func LoadPlugin(pluginPath string) common.Component {
+func LoadPlugin(pluginPath string) common.Module {
 
 	plug, err := plugin.Open(pluginPath)
 	if err != nil {
@@ -25,8 +25,8 @@ func LoadPlugin(pluginPath string) common.Component {
 	}
 
 	// Validate component type
-	var component common.Component
-	component, ok := sym.(common.Component)
+	var component common.Module
+	component, ok := sym.(common.Module)
 	if !ok {
 		log.Printf("Failed to load plugin '%s': Plugin component does not properly implement interface!", pluginPath)
 	}
@@ -35,15 +35,15 @@ func LoadPlugin(pluginPath string) common.Component {
 }
 
 // LoadPlugins loads all plugins and componenets in a directory
-func LoadPlugins(directory string) []common.Component {
+func LoadPlugins(directory string) []common.Module {
 
 	paths, err := os.ReadDir(directory)
 	if err != nil {
 		log.Printf("Failed to load plugins: %s", err)
-		return []common.Component{}
+		return []common.Module{}
 	}
 
-	var components []common.Component = make([]common.Component, 0)
+	var components []common.Module = make([]common.Module, 0)
 	for _, path := range paths {
 		if path.IsDir() {
 			continue

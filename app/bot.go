@@ -31,7 +31,7 @@ type Bot struct {
 	onEventUpdatedHandlers   [](func(common.Event) error)
 	onEventCompletedHandlers [](func(common.Event) error)
 
-	gameModules []common.GameModule
+	gameModules []common.ChatSyncModule
 }
 
 // Initalize creates the discord session and registers handlers
@@ -61,6 +61,11 @@ func (app *Bot) Initialize(cfg *core.Config) error {
 	app.Session.OnEventCreate(app.onEventCreate)
 	app.Session.OnEventDelete(app.onEventDelete)
 	app.Session.OnEventUpdate(app.onEventUpdate)
+
+	btn := app.Session.NewButton("test", "Click Me")
+	btn.OnClick(func(user common.User) {
+		print("clicked")
+	})
 
 	return nil
 }
