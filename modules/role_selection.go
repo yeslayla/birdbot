@@ -7,19 +7,23 @@ import (
 	"github.com/yeslayla/birdbot/common"
 	"github.com/yeslayla/birdbot/core"
 	"github.com/yeslayla/birdbot/discord"
+	"github.com/yeslayla/birdbot/persistence"
 )
 
 type roleSelectionModule struct {
-	session  *discord.Discord
+	session *discord.Discord
+	db      persistence.Database
+
 	cfg      core.RoleSelectionConfig
 	exlusive bool
 }
 
 // NewRoleSelectionComponent creates a new component
-func NewRoleSelectionComponent(discord *discord.Discord, cfg core.RoleSelectionConfig) common.Module {
+func NewRoleSelectionComponent(discord *discord.Discord, db persistence.Database, cfg core.RoleSelectionConfig) common.Module {
 	return &roleSelectionModule{
 		session:  discord,
 		cfg:      cfg,
+		db:       db,
 		exlusive: true,
 	}
 }
@@ -84,7 +88,16 @@ func (c *roleSelectionModule) Initialize(birdbot common.ModuleManager) error {
 		actionRow.AddComponent(btn)
 	}
 
-	c.session.CreateMessageComponent(c.cfg.SelectionChannel, fmt.Sprintf("**%s**\n%s", c.cfg.Title, c.cfg.Description), components)
+	localID := fmt.Sprint("role_selection:", c.cfg.Title)
+	messageID, err := c.db.GetDiscordMessage(localID)
+	if err != nil {
+		return err
+	}
+
+	if messageID == "" {
+		messageID = c.session.CreateMessageComponent(c.cfg.SelectionChannel, fmt.Sprintf("**%s**\n%s", c.cfg.Title, c.cfg.Description), components)
+		return c.db.SetDiscordMessage(localID, messageID)
+	}
 
 	return nil
 }

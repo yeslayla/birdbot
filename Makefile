@@ -16,7 +16,7 @@ go-full-build: go-clean go-get go-build
 go-build:
 	@echo "  >  Building binary..."
 	@mkdir -p $(GOBIN)
-	@go build -ldflags "-X github.com/yeslayla/birdbot/app.Version=$(VERSION) -X github.com/yeslayla/birdbot/app.Build=$(BUILD_NUMBER)" -o $(GOBIN)/$(PROJECT_BIN) $(GOFILES)
+	@CGO_ENABLED=1 go build -ldflags "-X github.com/yeslayla/birdbot/app.Version=$(VERSION) -X github.com/yeslayla/birdbot/app.Build=$(BUILD_NUMBER)" -o $(GOBIN)/$(PROJECT_BIN) $(GOFILES)
 	@chmod 755 $(GOBIN)/$(PROJECT_BIN)
 
 go-generate:

@@ -12,6 +12,7 @@ import (
 	"github.com/yeslayla/birdbot/app"
 	"github.com/yeslayla/birdbot/core"
 	"github.com/yeslayla/birdbot/modules"
+	"github.com/yeslayla/birdbot/persistence"
 )
 
 const PluginsDirectory = "./plugins"
@@ -50,6 +51,11 @@ func main() {
 		}
 	}
 
+	db := persistence.NewSqlite3Database()
+	if err := db.MigrateUp(); err != nil {
+		log.Fatal("Failed to migrate db: ", err)
+	}
+
 	bot := app.NewBot()
 
 	if err := bot.Initialize(cfg); err != nil {
@@ -70,7 +76,7 @@ func main() {
 
 	if cfg.Features.RoleSelection.IsEnabledByDefault() {
 		for _, v := range cfg.Discord.RoleSelections {
-			loader.LoadComponent(modules.NewRoleSelectionComponent(bot.Session, v))
+			loader.LoadComponent(modules.NewRoleSelectionComponent(bot.Session, db, v))
 		}
 	}
 
