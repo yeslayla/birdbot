@@ -22,10 +22,13 @@ func main() {
 	configDir, _ := os.UserConfigDir()
 
 	defaultConfigPath := path.Join(configDir, "birdbot", "config.yaml")
+	defaultDBPath := path.Join(configDir, "birdbot", "birdbot.db")
 
 	var config_file string
+	var db_file string
 	var version bool
 	flag.StringVar(&config_file, "c", defaultConfigPath, "Path to config file")
+	flag.StringVar(&db_file, "db", defaultDBPath, "Path to store persistant data")
 	flag.BoolVar(&version, "v", false, "List version")
 	flag.Parse()
 
@@ -51,7 +54,7 @@ func main() {
 		}
 	}
 
-	db := persistence.NewSqlite3Database()
+	db := persistence.NewSqlite3Database(db_file)
 	if err := db.MigrateUp(); err != nil {
 		log.Fatal("Failed to migrate db: ", err)
 	}

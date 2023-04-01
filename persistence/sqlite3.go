@@ -5,6 +5,8 @@ import (
 	"embed"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 	migrate "github.com/rubenv/sql-migrate"
@@ -17,8 +19,17 @@ type Sqlite3Database struct {
 	db *sql.DB
 }
 
-func NewSqlite3Database() *Sqlite3Database {
-	db, err := sql.Open("sqlite3", "./birdbot.db")
+// NewSqlite3Database creates a new SqliteDB object
+func NewSqlite3Database(path string) *Sqlite3Database {
+	dir := filepath.Dir(path)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			log.Printf("failed to create directory for db: %s", err)
+			return nil
+		}
+	}
+
+	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		log.Printf("failed to open db: %s", err)
 		return nil
@@ -36,6 +47,7 @@ func getMigrations() migrate.MigrationSource {
 	}
 }
 
+// MigrateUp migrates the DB
 func (db *Sqlite3Database) MigrateUp() error {
 
 	n, err := migrate.Exec(db.db, "sqlite3", getMigrations(), migrate.Up)
@@ -49,6 +61,7 @@ func (db *Sqlite3Database) MigrateUp() error {
 	return nil
 }
 
+// MigrateUp destroys the DB
 func (db *Sqlite3Database) MigrateDown() error {
 
 	n, err := migrate.Exec(db.db, "sqlite3", getMigrations(), migrate.Down)
@@ -62,18 +75,23 @@ func (db *Sqlite3Database) MigrateDown() error {
 	return nil
 }
 
+// GetDiscordMessage finds a discord message ID from a given local ID
 func (db *Sqlite3Database) GetDiscordMessage(id string) (string, error) {
 
 	var messageID string
 	row := db.db.QueryRow("SELECT message_id FROM discord_messages WHERE id = $1", id)
 
 	if err := row.Scan(&messageID); err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil
+		}
 		return "", fmt.Errorf("failed to get discord message from sqlite3: %s", err)
 	}
 
 	return messageID, nil
 }
 
+// SetDiscordMessage sets a discord message ID from a given local ID
 func (db *Sqlite3Database) SetDiscordMessage(id string, messageID string) error {
 
 	statement, err := db.db.Prepare("INSERT OR IGNORE INTO discord_messages (id, message_id) VALUES (?, ?)")

@@ -25,3 +25,6 @@ docker run -it -v `pwd`:/etc/birdbot yeslayla/birdbot:latest
 ```
 
 In this example, your config is in the current directory and call `birdbot.yaml`
+
+### Persistant Data
+
