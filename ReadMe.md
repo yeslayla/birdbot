@@ -28,3 +28,9 @@ In this example, your config is in the current directory and call `birdbot.yaml`
 
 ### Persistant Data
 
+The default location for container data is `/var/lib/birdbot/` so you can mount it like:
+
+Example: 
+```bash
+docker run -it -v `pwd`:/var/lib/birdbot/ yeslayla/birdbot:latest
+```
