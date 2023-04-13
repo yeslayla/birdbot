@@ -21,11 +21,11 @@ steps:
     image: golang:1.20
     commands:
     - make test
-  - name: Test
+  - name: Build
     image: golang:1.20
     commands:
     - make build $VERSION
-  - name: docker
+  - name: Docker
     image: plugins/docker
     settings:
       username:
