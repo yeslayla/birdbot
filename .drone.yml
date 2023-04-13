@@ -11,3 +11,40 @@ steps:
   image: golang:1.20
   commands:
   - make build VERSION="test"
+---
+kind: pipeline
+type: docker
+name: Publish
+
+steps:
+  - name: Test
+    image: golang:1.20
+    commands:
+    - make test
+  - name: Test
+    image: golang:1.20
+    commands:
+    - make build $VERSION
+  - name: docker
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      repo: yeslayla/birdbot
+      tags:
+      - latest
+      - $VERSION
+---
+kind: secret
+name: docker_username
+get:
+  path: secrets/secret/cloud/docker
+  name: username
+---
+kind: secret
+name: docker_password
+get:
+  path: secrets/secret/cloud/docker
+  name: password
