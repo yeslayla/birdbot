@@ -1,0 +1,13 @@
+kind: pipeline
+type: docker
+name: Validate
+
+steps:
+- name: Test
+  image: golang:1.20
+  commands:
+  - make test
+- name: Build
+  image: golang:1.20
+  commands:
+  - make build VERSION="test"
