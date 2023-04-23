@@ -47,11 +47,11 @@ steps:
 kind: secret
 name: docker_username
 get:
-  path: secrets/secret/cloud/docker
+  path: secrets/data/cloud/docker
   name: username
 ---
 kind: secret
 name: docker_password
 get:
-  path: secrets/secret/cloud/docker
+  path: secrets/data/cloud/docker
   name: password
