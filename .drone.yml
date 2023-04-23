@@ -25,6 +25,13 @@ steps:
     image: golang:1.20
     commands:
     - make build $VERSION
+  - name: Example
+    image: golang:1.20
+    environment:
+      USERNAME:
+        from_secret: docker_username
+    commands:
+      - echo $USERNAME
   - name: Docker
     image: plugins/docker
     settings:
