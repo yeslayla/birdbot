@@ -47,7 +47,7 @@ type MastodonConfig struct {
 type Features struct {
 	ManageEventChannels Feature `yaml:"manage_event_channels" env:"BIRD_EVENT_CHANNELS"`
 	AnnounceEvents      Feature `yaml:"announce_events" env:"BIRD_ANNOUNCE_EVENTS"`
-	ReccurringEvents    Feature `yaml:"recurring_events" env:"BIRD_RECURRING_EVENTS"`
+	RecurringEvents     Feature `yaml:"recurring_events" env:"BIRD_RECURRING_EVENTS"`
 	RoleSelection       Feature `yaml:"role_selection" env:"BIRD_ROLE_SELECTION"`
 	LoadGamePlugins     Feature `yaml:"load_game_plugins" env:"BIRD_LOAD_GAME_PLUGINS"`
 }

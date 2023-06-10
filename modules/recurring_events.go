@@ -13,8 +13,10 @@ type recurringEventsModule struct {
 }
 
 // NewRecurringEventsComponent creates a new component instance
-func NewRecurringEventsComponent() common.Module {
-	return &recurringEventsModule{}
+func NewRecurringEventsComponent(session *discord.Discord) common.Module {
+	return &recurringEventsModule{
+		session: session,
+	}
 }
 
 // Initialize registers event listeners

@@ -73,8 +73,8 @@ func main() {
 	if cfg.Features.ManageEventChannels.IsEnabledByDefault() {
 		loader.LoadComponent(modules.NewManageEventChannelsComponent(cfg.Discord.EventCategory, cfg.Discord.ArchiveCategory, bot.Session))
 	}
-	if cfg.Features.ReccurringEvents.IsEnabledByDefault() {
-		loader.LoadComponent(modules.NewRecurringEventsComponent())
+	if cfg.Features.RecurringEvents.IsEnabledByDefault() {
+		loader.LoadComponent(modules.NewRecurringEventsComponent(bot.Session))
 	}
 
 	if cfg.Features.RoleSelection.IsEnabledByDefault() {
