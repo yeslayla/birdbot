@@ -62,11 +62,6 @@ func (app *Bot) Initialize(cfg *core.Config) error {
 	app.Session.OnEventDelete(app.onEventDelete)
 	app.Session.OnEventUpdate(app.onEventUpdate)
 
-	btn := app.Session.NewButton("test", "Click Me")
-	btn.OnClick(func(user common.User) {
-		print("clicked")
-	})
-
 	return nil
 }
 
