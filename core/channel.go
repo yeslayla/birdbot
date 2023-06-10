@@ -22,6 +22,10 @@ func GenerateEventChannelName(eventName string, location string, dateTime time.T
 	city := GetCityFromLocation(location)
 	year := dateTime.Year()
 
+	// Remove special characters
+	eventName = regexp.MustCompile(`[^a-zA-Z0-9 ]+`).ReplaceAllString(eventName, "")
+	eventName = strings.Trim(eventName, " ")
+
 	channel := fmt.Sprint(month, "-", day, city, "-", eventName, "-", year)
 	channel = strings.ReplaceAll(channel, " ", "-")
 	channel = strings.ToLower(channel)
