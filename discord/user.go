@@ -18,7 +18,8 @@ func NewUser(user *discordgo.User) common.User {
 	}
 
 	return common.User{
-		ID: user.ID,
+		DisplayName: user.Username,
+		ID:          user.ID,
 	}
 }
 

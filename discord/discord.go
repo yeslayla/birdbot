@@ -14,25 +14,32 @@ import (
 type Discord struct {
 	mock.Mock
 
-	guildID string
-	session *discordgo.Session
+	guildID       string
+	applicationID string
+	session       *discordgo.Session
+
+	commands        map[string]*discordgo.ApplicationCommand
+	commandHandlers map[string]func(session *discordgo.Session, i *discordgo.InteractionCreate)
 
 	// Signal for shutdown
 	stop chan os.Signal
 }
 
 // New creates a new Discord session
-func New(guildID string, token string) *Discord {
+func New(applicationID string, guildID string, token string) *Discord {
 
 	// Create Discord Session
 	session, err := discordgo.New(fmt.Sprint("Bot ", token))
 	if err != nil {
 		log.Fatalf("Failed to create Discord session: %v", err)
 	}
-
+	session.ShouldReconnectOnError = true
 	return &Discord{
-		session: session,
-		guildID: guildID,
+		session:         session,
+		applicationID:   applicationID,
+		guildID:         guildID,
+		commands:        make(map[string]*discordgo.ApplicationCommand),
+		commandHandlers: make(map[string]func(*discordgo.Session, *discordgo.InteractionCreate)),
 	}
 }
 
@@ -44,10 +51,24 @@ func (discord *Discord) Run() error {
 	}
 	defer discord.session.Close()
 
+	// Register command handler
+	discord.session.AddHandler(func(session *discordgo.Session, i *discordgo.InteractionCreate) {
+		if i.GuildID != discord.guildID {
+			return
+		}
+
+		if handler, ok := discord.commandHandlers[i.ApplicationCommandData().Name]; ok {
+			handler(session, i)
+		}
+	})
+
 	// Keep alive
 	discord.stop = make(chan os.Signal, 1)
 	signal.Notify(discord.stop, os.Interrupt)
 	<-discord.stop
+
+	discord.ClearCommands()
+
 	return nil
 }
 

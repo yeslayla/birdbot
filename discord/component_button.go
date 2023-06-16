@@ -24,6 +24,10 @@ func (discord *Discord) NewButton(id string, label string) *Button {
 // OnClick registers an event when the button is clicked
 func (button *Button) OnClick(action func(user common.User)) {
 	button.discord.session.AddHandler(func(s *discordgo.Session, r *discordgo.InteractionCreate) {
+		if r.Interaction.Type != discordgo.InteractionMessageComponent {
+			return
+		}
+
 		if r.MessageComponentData().CustomID == button.ID {
 
 			action(NewUser(r.Member.User))

@@ -83,6 +83,15 @@ func main() {
 		}
 	}
 
+	if cfg.Features.Feedback.IsEnabled() {
+		loader.LoadComponent(modules.NewFeedbackWebhookComponent(cfg.Feedback.WebhookURL, modules.FeedbackWebhookConfiguration{
+			PayloadType: cfg.Feedback.PayloadType,
+
+			SuccessMessage: cfg.Feedback.SuccessMessage,
+			FailureMessage: cfg.Feedback.FailureMessage,
+		}, bot.Session))
+	}
+
 	if _, err := os.Stat(PluginsDirectory); !os.IsNotExist(err) {
 		components := app.LoadPlugins(PluginsDirectory)
 		for _, comp := range components {

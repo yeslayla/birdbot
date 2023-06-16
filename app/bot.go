@@ -46,6 +46,9 @@ func (app *Bot) Initialize(cfg *core.Config) error {
 	if app.guildID == "" {
 		return fmt.Errorf("discord Guild ID is not set")
 	}
+	if cfg.Discord.ApplicationID == "" {
+		return fmt.Errorf("discord Application ID is not set")
+	}
 
 	if cfg.Mastodon.ClientID != "" && cfg.Mastodon.ClientSecret != "" &&
 		cfg.Mastodon.Username != "" && cfg.Mastodon.Password != "" &&
@@ -54,7 +57,7 @@ func (app *Bot) Initialize(cfg *core.Config) error {
 			cfg.Mastodon.Username, cfg.Mastodon.Password)
 	}
 
-	app.Session = discord.New(app.guildID, cfg.Discord.Token)
+	app.Session = discord.New(cfg.Discord.ApplicationID, app.guildID, cfg.Discord.Token)
 
 	// Register Event Handlers
 	app.Session.OnReady(app.onReady)

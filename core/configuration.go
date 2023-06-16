@@ -6,19 +6,29 @@ import "strings"
 type Config struct {
 	Discord  DiscordConfig  `yaml:"discord"`
 	Mastodon MastodonConfig `yaml:"mastodon"`
+	Feedback Feedback       `yaml:"feedback"`
 	Features Features       `yaml:"features"`
 }
 
 // DiscordConfig contains discord specific configuration
 type DiscordConfig struct {
-	Token   string `yaml:"token" env:"DISCORD_TOKEN"`
-	GuildID string `yaml:"guild_id" env:"DISCORD_GUILD_ID"`
+	Token         string `yaml:"token" env:"DISCORD_TOKEN"`
+	ApplicationID string `yaml:"application_id" env:"DISCORD_APPLICATION_ID"`
+	GuildID       string `yaml:"guild_id" env:"DISCORD_GUILD_ID"`
 
 	EventCategory       string `yaml:"event_category" env:"DISCORD_EVENT_CATEGORY"`
 	ArchiveCategory     string `yaml:"archive_category" env:"DISCORD_ARCHIVE_CATEGORY"`
 	NotificationChannel string `yaml:"notification_channel" env:"DISCORD_NOTIFICATION_CHANNEL"`
 
 	RoleSelections []RoleSelectionConfig `yaml:"role_selection"`
+}
+
+type Feedback struct {
+	WebhookURL  string `yaml:"url" env:"BIRD_FEEDBACK_URL"`
+	PayloadType string `yaml:"type" env:"BIRD_FEEDBACK_TYPE"`
+
+	SuccessMessage string `yaml:"success_message"`
+	FailureMessage string `yaml:"failure_message"`
 }
 
 type RoleSelectionConfig struct {
@@ -49,6 +59,7 @@ type Features struct {
 	AnnounceEvents      Feature `yaml:"announce_events" env:"BIRD_ANNOUNCE_EVENTS"`
 	RecurringEvents     Feature `yaml:"recurring_events" env:"BIRD_RECURRING_EVENTS"`
 	RoleSelection       Feature `yaml:"role_selection" env:"BIRD_ROLE_SELECTION"`
+	Feedback            Feature `yaml:"feedback" env:"BIRD_FEEDBACK"`
 	LoadGamePlugins     Feature `yaml:"load_game_plugins" env:"BIRD_LOAD_GAME_PLUGINS"`
 }
 
