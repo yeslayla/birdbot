@@ -89,7 +89,7 @@ func main() {
 
 			SuccessMessage: cfg.Feedback.SuccessMessage,
 			FailureMessage: cfg.Feedback.FailureMessage,
-		}, bot.Session))
+		}))
 	}
 
 	if _, err := os.Stat(PluginsDirectory); !os.IsNotExist(err) {

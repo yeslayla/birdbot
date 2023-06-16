@@ -21,5 +21,8 @@ type ModuleManager interface {
 	CreateEvent(event Event) error
 	Notify(message string) error
 
+	// Commands
+	RegisterCommand(string, ChatCommandConfiguration, func(User, map[string]any) string)
+
 	RegisterChatSyncModule(ID string, plugin ChatSyncModule) error
 }

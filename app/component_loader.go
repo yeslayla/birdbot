@@ -62,3 +62,7 @@ func (loader *ComponentLoader) Notify(message string) error {
 	loader.bot.Notify(message)
 	return nil
 }
+
+func (loader *ComponentLoader) RegisterCommand(name string, config common.ChatCommandConfiguration, handler func(common.User, map[string]any) string) {
+	loader.bot.Session.RegisterCommand(name, config, handler)
+}

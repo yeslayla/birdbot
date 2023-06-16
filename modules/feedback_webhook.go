@@ -9,11 +9,9 @@ import (
 	"net/http"
 
 	"github.com/yeslayla/birdbot/common"
-	"github.com/yeslayla/birdbot/discord"
 )
 
 type feedbackWebhookModule struct {
-	session        *discord.Discord
 	webhookURL     string
 	payloadType    string
 	successMessage string
@@ -27,9 +25,8 @@ type FeedbackWebhookConfiguration struct {
 }
 
 // NewFeedbackWebhookComponent creates a new component
-func NewFeedbackWebhookComponent(webhookURL string, config FeedbackWebhookConfiguration, session *discord.Discord) common.Module {
+func NewFeedbackWebhookComponent(webhookURL string, config FeedbackWebhookConfiguration) common.Module {
 	m := &feedbackWebhookModule{
-		session:        session,
 		webhookURL:     webhookURL,
 		payloadType:    "default",
 		successMessage: "Feedback recieved!",
@@ -50,13 +47,13 @@ func NewFeedbackWebhookComponent(webhookURL string, config FeedbackWebhookConfig
 }
 
 func (c *feedbackWebhookModule) Initialize(birdbot common.ModuleManager) error {
-	c.session.RegisterCommand("feedback", discord.CommandConfiguration{
+	birdbot.RegisterCommand("feedback", common.ChatCommandConfiguration{
 		Description:       "Sends a feedback message",
 		EphemeralResponse: true,
-		Options: map[string]discord.CommandOption{
+		Options: map[string]common.ChatCommandOption{
 			"message": {
 				Description: "Content of what you'd like to communicate in your feedback.",
-				Type:        discord.CommandTypeString,
+				Type:        common.CommandTypeString,
 				Required:    true,
 			},
 		},

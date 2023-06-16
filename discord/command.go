@@ -7,29 +7,8 @@ import (
 	"github.com/yeslayla/birdbot/common"
 )
 
-type CommandConfiguration struct {
-	Description       string
-	EphemeralResponse bool
-	Options           map[string]CommandOption
-}
-
-type CommandOption struct {
-	Description string
-	Type        CommandOptionType
-	Required    bool
-}
-
-type CommandOptionType uint64
-
-const (
-	CommandTypeString CommandOptionType = CommandOptionType(discordgo.ApplicationCommandOptionString)
-	CommandTypeInt    CommandOptionType = CommandOptionType(discordgo.ApplicationCommandOptionInteger)
-	CommandTypeBool   CommandOptionType = CommandOptionType(discordgo.ApplicationCommandOptionBoolean)
-	CommandTypeFloat  CommandOptionType = CommandOptionType(discordgo.ApplicationCommandOptionNumber)
-)
-
 // RegisterCommand creates an new command that can be used to interact with bird bot
-func (discord *Discord) RegisterCommand(name string, config CommandConfiguration, handler func(common.User, map[string]any) string) {
+func (discord *Discord) RegisterCommand(name string, config common.ChatCommandConfiguration, handler func(common.User, map[string]any) string) {
 	command := &discordgo.ApplicationCommand{
 		Name:        name,
 		Description: config.Description,
@@ -60,13 +39,13 @@ func (discord *Discord) RegisterCommand(name string, config CommandConfiguration
 		optionsMap := make(map[string]any, len(cmdOptions))
 		for _, opt := range cmdOptions {
 			switch config.Options[opt.Name].Type {
-			case CommandTypeString:
+			case common.CommandTypeString:
 				optionsMap[opt.Name] = opt.StringValue()
-			case CommandTypeInt:
+			case common.CommandTypeInt:
 				optionsMap[opt.Name] = opt.IntValue()
-			case CommandTypeBool:
+			case common.CommandTypeBool:
 				optionsMap[opt.Name] = opt.BoolValue()
-			case CommandTypeFloat:
+			case common.CommandTypeFloat:
 				optionsMap[opt.Name] = opt.FloatValue()
 			default:
 				optionsMap[opt.Name] = opt.Value
