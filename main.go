@@ -59,7 +59,7 @@ func main() {
 		log.Fatal("Failed to migrate db: ", err)
 	}
 
-	bot := app.NewBot()
+	bot := app.NewBot(db)
 
 	if err := bot.Initialize(cfg); err != nil {
 		log.Fatal("Failed to initialize: ", err)

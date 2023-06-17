@@ -120,3 +120,49 @@ func (db *Sqlite3Database) SetDiscordMessage(id string, messageID string) error 
 
 	return nil
 }
+
+// GetDiscordWebhook finds a discord webhook based on a given local id
+func (db *Sqlite3Database) GetDiscordWebhook(id string) (*DBDiscordWebhook, error) {
+
+	var data DBDiscordWebhook = DBDiscordWebhook{}
+	row := db.db.QueryRow("SELECT webhook_id, webhook_token FROM discord_webhooks WHERE id = $1", id)
+
+	if err := row.Scan(&data.ID, &data.Token); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get discord webhook from sqlite3: %s", err)
+	}
+
+	return &data, nil
+}
+
+// SetDiscordWebhook stores a discord webhook based on a given local id
+func (db *Sqlite3Database) SetDiscordWebhook(id string, data *DBDiscordWebhook) error {
+
+	statement, err := db.db.Prepare("INSERT OR IGNORE INTO discord_webhooks (id, webhook_id, webhook_token) VALUES (?, ?)")
+	if err != nil {
+		return err
+	}
+
+	result, err := statement.Exec(id, data.ID, data.Token)
+	if err != nil {
+		return err
+	}
+
+	n, _ := result.RowsAffected()
+
+	if n == 0 {
+		statement, err := db.db.Prepare("UPDATE discord_webhooks SET webhook_id = (?), webhook_token = (?) WHERE id = (?)")
+		if err != nil {
+			return err
+		}
+
+		if _, err := statement.Exec(data.ID, data.Token, id); err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}

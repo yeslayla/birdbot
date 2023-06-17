@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/yeslayla/birdbot/common"
@@ -50,8 +49,14 @@ func (loader *ComponentLoader) OnEventComplete(handler func(common.Event) error)
 	return nil
 }
 
-func (loader *ComponentLoader) RegisterChatSyncModule(ID string, plugin common.ChatSyncModule) error {
-	return fmt.Errorf("unimplemented")
+func (loader *ComponentLoader) RegisterExternalChat(channelID string, chat common.ExternalChatModule) error {
+	if _, ok := loader.bot.channelChats[channelID]; !ok {
+		loader.bot.channelChats[channelID] = []common.ExternalChatModule{}
+	}
+
+	loader.bot.channelChats[channelID] = append(loader.bot.channelChats[channelID], chat)
+
+	return nil
 }
 
 func (loader *ComponentLoader) CreateEvent(event common.Event) error {

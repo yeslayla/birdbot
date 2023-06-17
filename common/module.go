@@ -24,5 +24,6 @@ type ModuleManager interface {
 	// Commands
 	RegisterCommand(string, ChatCommandConfiguration, func(User, map[string]any) string)
 
-	RegisterChatSyncModule(ID string, plugin ChatSyncModule) error
+	// Submodules
+	RegisterExternalChat(channelID string, chat ExternalChatModule) error
 }

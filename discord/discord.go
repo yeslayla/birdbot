@@ -9,6 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/stretchr/testify/mock"
 	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot/persistence"
 )
 
 type Discord struct {
@@ -21,12 +22,14 @@ type Discord struct {
 	commands        map[string]*discordgo.ApplicationCommand
 	commandHandlers map[string]func(session *discordgo.Session, i *discordgo.InteractionCreate)
 
+	db persistence.Database
+
 	// Signal for shutdown
 	stop chan os.Signal
 }
 
 // New creates a new Discord session
-func New(applicationID string, guildID string, token string) *Discord {
+func New(applicationID string, guildID string, token string, db persistence.Database) *Discord {
 
 	// Create Discord Session
 	session, err := discordgo.New(fmt.Sprint("Bot ", token))
@@ -35,6 +38,8 @@ func New(applicationID string, guildID string, token string) *Discord {
 	}
 	session.ShouldReconnectOnError = true
 	return &Discord{
+		db: db,
+
 		session:         session,
 		applicationID:   applicationID,
 		guildID:         guildID,
@@ -114,6 +119,17 @@ func (discord *Discord) OnEventUpdate(handler func(*Discord, common.Event)) {
 		}
 		event := NewEvent(r.GuildScheduledEvent)
 		handler(discord, event)
+	})
+}
+
+// OnMessageRecieved registers a handler when a message is recieved
+func (discord *Discord) OnMessageRecieved(handler func(*Discord, string, common.User, string)) {
+	discord.session.AddHandler(func(s *discordgo.Session, r *discordgo.MessageCreate) {
+		if r.GuildID != discord.guildID {
+			return
+		}
+
+		handler(discord, r.ChannelID, NewUser(r.Author), r.Content)
 	})
 }
 

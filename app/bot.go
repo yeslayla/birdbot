@@ -8,6 +8,7 @@ import (
 	"github.com/yeslayla/birdbot/core"
 	"github.com/yeslayla/birdbot/discord"
 	"github.com/yeslayla/birdbot/mastodon"
+	"github.com/yeslayla/birdbot/persistence"
 )
 
 var Version string
@@ -16,6 +17,8 @@ var Build string
 type Bot struct {
 	Session  *discord.Discord
 	Mastodon *mastodon.Mastodon
+
+	Database persistence.Database
 
 	// Discord Objects
 	guildID               string
@@ -31,7 +34,7 @@ type Bot struct {
 	onEventUpdatedHandlers   [](func(common.Event) error)
 	onEventCompletedHandlers [](func(common.Event) error)
 
-	gameModules []common.ChatSyncModule
+	channelChats map[string][]common.ExternalChatModule
 }
 
 // Initalize creates the discord session and registers handlers
@@ -57,13 +60,25 @@ func (app *Bot) Initialize(cfg *core.Config) error {
 			cfg.Mastodon.Username, cfg.Mastodon.Password)
 	}
 
-	app.Session = discord.New(cfg.Discord.ApplicationID, app.guildID, cfg.Discord.Token)
+	app.Session = discord.New(cfg.Discord.ApplicationID, app.guildID, cfg.Discord.Token, app.Database)
+
+	// Intialize submodules
+	for channelID, chats := range app.channelChats {
+		channel := app.Session.NewChannelFromID(channelID)
+		for _, chat := range chats {
+			app.InitalizeExternalChat(channel, chat)
+		}
+	}
 
 	// Register Event Handlers
 	app.Session.OnReady(app.onReady)
 	app.Session.OnEventCreate(app.onEventCreate)
 	app.Session.OnEventDelete(app.onEventDelete)
 	app.Session.OnEventUpdate(app.onEventUpdate)
+
+	if len(app.channelChats) > 0 {
+		app.Session.OnMessageRecieved(app.onMessageRecieved)
+	}
 
 	return nil
 }
@@ -160,7 +175,21 @@ func (app *Bot) onEventComplete(d *discord.Discord, event common.Event) {
 
 }
 
+func (app *Bot) onMessageRecieved(d *discord.Discord, channelID string, user common.User, message string) {
+	chats, ok := app.channelChats[channelID]
+	if !ok {
+		return
+	}
+
+	for _, chat := range chats {
+		chat.RecieveMessage(user, message)
+	}
+}
+
 // NewBot creates a new bot instance
-func NewBot() *Bot {
-	return &Bot{}
+func NewBot(db persistence.Database) *Bot {
+	return &Bot{
+		Database:     db,
+		channelChats: make(map[string][]common.ExternalChatModule),
+	}
 }
