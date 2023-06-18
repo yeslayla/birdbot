@@ -52,11 +52,18 @@ func (discord *Discord) RegisterCommand(name string, config common.ChatCommandCo
 			}
 		}
 
+		session.InteractionRespond(r.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Flags: discordgo.MessageFlagsEphemeral,
+			},
+		})
+
 		result := handler(NewUser(r.Member.User), optionsMap)
 
 		if result != "" {
 			// Handle response
-			responseData := &discordgo.InteractionResponseData{
+			responseData := &discordgo.WebhookParams{
 				Content: result,
 			}
 
@@ -64,11 +71,12 @@ func (discord *Discord) RegisterCommand(name string, config common.ChatCommandCo
 				responseData.Flags = discordgo.MessageFlagsEphemeral
 			}
 
-			session.InteractionRespond(r.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: responseData,
-			})
+			session.FollowupMessageCreate(r.Interaction, false, responseData)
+
 		} else {
+			session.FollowupMessageCreate(r.Interaction, false, &discordgo.WebhookParams{
+				Content: "Command did not return a response!",
+			})
 			log.Printf("Command '%s' did not return a response: %v", name, optionsMap)
 		}
 	}
