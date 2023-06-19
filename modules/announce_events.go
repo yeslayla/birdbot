@@ -3,7 +3,7 @@ package modules
 import (
 	"fmt"
 
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 	"github.com/yeslayla/birdbot/mastodon"
 )
 

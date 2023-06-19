@@ -2,17 +2,20 @@ package app
 
 import (
 	"log"
+	"path/filepath"
 
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 )
 
 type ComponentLoader struct {
-	bot *Bot
+	bot       *Bot
+	configDir string
 }
 
-func NewComponentLoader(bot *Bot) *ComponentLoader {
+func NewComponentLoader(bot *Bot, configDir string) *ComponentLoader {
 	return &ComponentLoader{
-		bot: bot,
+		bot:       bot,
+		configDir: configDir,
 	}
 }
 
@@ -49,13 +52,8 @@ func (loader *ComponentLoader) OnEventComplete(handler func(common.Event) error)
 	return nil
 }
 
-func (loader *ComponentLoader) RegisterExternalChat(channelID string, chat common.ExternalChatModule) error {
-	if _, ok := loader.bot.channelChats[channelID]; !ok {
-		loader.bot.channelChats[channelID] = []common.ExternalChatModule{}
-	}
-
-	loader.bot.channelChats[channelID] = append(loader.bot.channelChats[channelID], chat)
-
+func (loader *ComponentLoader) RegisterExternalChat(ID string, chat common.ExternalChatModule) error {
+	loader.bot.chatHandlers[ID] = chat
 	return nil
 }
 
@@ -70,4 +68,8 @@ func (loader *ComponentLoader) Notify(message string) error {
 
 func (loader *ComponentLoader) RegisterCommand(name string, config common.ChatCommandConfiguration, handler func(common.User, map[string]any) string) {
 	loader.bot.Session.RegisterCommand(name, config, handler)
+}
+
+func (loader *ComponentLoader) GetConfigPath(fileName string) string {
+	return filepath.Join(loader.configDir, "birdbot", fileName)
 }

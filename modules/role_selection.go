@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 	"github.com/yeslayla/birdbot/core"
 	"github.com/yeslayla/birdbot/discord"
 	"github.com/yeslayla/birdbot/persistence"

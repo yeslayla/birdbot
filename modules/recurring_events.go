@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 	"github.com/yeslayla/birdbot/discord"
 )
 

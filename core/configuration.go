@@ -21,6 +21,8 @@ type DiscordConfig struct {
 	NotificationChannel string `yaml:"notification_channel" env:"DISCORD_NOTIFICATION_CHANNEL"`
 
 	RoleSelections []RoleSelectionConfig `yaml:"role_selection"`
+
+	ChatLinks map[string][]string `yaml:"chat_links"`
 }
 
 type Feedback struct {

@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 )
 
 type feedbackWebhookModule struct {

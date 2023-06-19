@@ -65,7 +65,7 @@ func main() {
 		log.Fatal("Failed to initialize: ", err)
 	}
 
-	loader := app.NewComponentLoader(bot)
+	loader := app.NewComponentLoader(bot, configDir)
 
 	if cfg.Features.AnnounceEvents.IsEnabledByDefault() {
 		loader.LoadComponent(modules.NewAnnounceEventsComponent(bot.Mastodon, cfg.Discord.NotificationChannel))

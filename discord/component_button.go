@@ -2,7 +2,7 @@ package discord
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 )
 
 type Button struct {

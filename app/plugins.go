@@ -3,9 +3,10 @@ package app
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"plugin"
 
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 )
 
 // LoadPlugin loads a plugin and returns its component if successful
@@ -49,7 +50,7 @@ func LoadPlugins(directory string) []common.Module {
 			continue
 		}
 
-		if comp := LoadPlugin(path.Name()); comp != nil {
+		if comp := LoadPlugin(filepath.Join(directory, path.Name())); comp != nil {
 			components = append(components, comp)
 		}
 	}

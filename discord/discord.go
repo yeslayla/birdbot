@@ -8,7 +8,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/stretchr/testify/mock"
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 	"github.com/yeslayla/birdbot/persistence"
 )
 
@@ -125,7 +125,7 @@ func (discord *Discord) OnEventUpdate(handler func(*Discord, common.Event)) {
 // OnMessageRecieved registers a handler when a message is recieved
 func (discord *Discord) OnMessageRecieved(handler func(*Discord, string, common.User, string)) {
 	discord.session.AddHandler(func(s *discordgo.Session, r *discordgo.MessageCreate) {
-		if r.GuildID != discord.guildID {
+		if r.GuildID != discord.guildID || r.Author.Bot {
 			return
 		}
 

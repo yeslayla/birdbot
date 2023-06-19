@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 )
 
 type Channel struct {

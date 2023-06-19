@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 )
 
 // NewUser creates a new user object from a discordgo.User object

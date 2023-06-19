@@ -140,7 +140,7 @@ func (db *Sqlite3Database) GetDiscordWebhook(id string) (*DBDiscordWebhook, erro
 // SetDiscordWebhook stores a discord webhook based on a given local id
 func (db *Sqlite3Database) SetDiscordWebhook(id string, data *DBDiscordWebhook) error {
 
-	statement, err := db.db.Prepare("INSERT OR IGNORE INTO discord_webhooks (id, webhook_id, webhook_token) VALUES (?, ?)")
+	statement, err := db.db.Prepare("INSERT OR IGNORE INTO discord_webhooks (id, webhook_id, webhook_token) VALUES (?, ?, ?)")
 	if err != nil {
 		return err
 	}

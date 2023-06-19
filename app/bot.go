@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 	"github.com/yeslayla/birdbot/core"
 	"github.com/yeslayla/birdbot/discord"
 	"github.com/yeslayla/birdbot/mastodon"
@@ -34,6 +34,8 @@ type Bot struct {
 	onEventUpdatedHandlers   [](func(common.Event) error)
 	onEventCompletedHandlers [](func(common.Event) error)
 
+	chatLinks    map[string][]string
+	chatHandlers map[string]common.ExternalChatModule
 	channelChats map[string][]common.ExternalChatModule
 }
 
@@ -45,6 +47,7 @@ func (app *Bot) Initialize(cfg *core.Config) error {
 	app.eventCategoryID = cfg.Discord.EventCategory
 	app.archiveCategoryID = cfg.Discord.ArchiveCategory
 	app.notificationChannelID = cfg.Discord.NotificationChannel
+	app.chatLinks = cfg.Discord.ChatLinks
 
 	if app.guildID == "" {
 		return fmt.Errorf("discord Guild ID is not set")
@@ -62,29 +65,21 @@ func (app *Bot) Initialize(cfg *core.Config) error {
 
 	app.Session = discord.New(cfg.Discord.ApplicationID, app.guildID, cfg.Discord.Token, app.Database)
 
-	// Intialize submodules
-	for channelID, chats := range app.channelChats {
-		channel := app.Session.NewChannelFromID(channelID)
-		for _, chat := range chats {
-			app.InitalizeExternalChat(channel, chat)
-		}
-	}
-
 	// Register Event Handlers
 	app.Session.OnReady(app.onReady)
 	app.Session.OnEventCreate(app.onEventCreate)
 	app.Session.OnEventDelete(app.onEventDelete)
 	app.Session.OnEventUpdate(app.onEventUpdate)
 
-	if len(app.channelChats) > 0 {
-		app.Session.OnMessageRecieved(app.onMessageRecieved)
-	}
-
 	return nil
 }
 
 // Run opens the session with Discord until exit
 func (app *Bot) Run() error {
+
+	// Intialize submodules
+	app.prepareChat()
+
 	return app.Session.Run()
 }
 
@@ -186,10 +181,40 @@ func (app *Bot) onMessageRecieved(d *discord.Discord, channelID string, user com
 	}
 }
 
+func (app *Bot) prepareChat() {
+
+	// Associate channels with chat modules
+	for channelID, chatHandelerIDs := range app.chatLinks {
+		if _, ok := app.channelChats[channelID]; !ok {
+			app.channelChats[channelID] = []common.ExternalChatModule{}
+		}
+
+		for _, chatHandlerID := range chatHandelerIDs {
+			if handler, ok := app.chatHandlers[chatHandlerID]; ok {
+				app.channelChats[channelID] = append(app.channelChats[channelID], handler)
+			}
+		}
+	}
+
+	// Initialize chat modules
+	for channelID, chats := range app.channelChats {
+		channel := app.Session.NewChannelFromID(channelID)
+		for _, chat := range chats {
+			app.InitalizeExternalChat(channel, chat)
+		}
+	}
+
+	// Register listener if needed
+	if len(app.channelChats) > 0 {
+		app.Session.OnMessageRecieved(app.onMessageRecieved)
+	}
+}
+
 // NewBot creates a new bot instance
 func NewBot(db persistence.Database) *Bot {
 	return &Bot{
 		Database:     db,
 		channelChats: make(map[string][]common.ExternalChatModule),
+		chatHandlers: make(map[string]common.ExternalChatModule),
 	}
 }

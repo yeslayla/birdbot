@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/yeslayla/birdbot/common"
+	"github.com/yeslayla/birdbot-common/common"
 )
 
 // RegisterCommand creates an new command that can be used to interact with bird bot
