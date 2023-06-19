@@ -71,5 +71,5 @@ func (loader *ComponentLoader) RegisterCommand(name string, config common.ChatCo
 }
 
 func (loader *ComponentLoader) GetConfigPath(fileName string) string {
-	return filepath.Join(loader.configDir, "birdbot", fileName)
+	return filepath.Join(loader.configDir, fileName)
 }
