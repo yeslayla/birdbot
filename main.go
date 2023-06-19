@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/yeslayla/birdbot/app"
@@ -31,6 +32,9 @@ func main() {
 	flag.StringVar(&db_file, "db", defaultDBPath, "Path to store persistant data")
 	flag.BoolVar(&version, "v", false, "List version")
 	flag.Parse()
+
+	// Use given config dir
+	configDir = filepath.Dir(config_file)
 
 	if version {
 		fmt.Printf("BirdBot %s (%s)\n", app.Version, app.Build)
