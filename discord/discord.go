@@ -58,7 +58,7 @@ func (discord *Discord) Run() error {
 
 	// Register command handler
 	discord.session.AddHandler(func(session *discordgo.Session, i *discordgo.InteractionCreate) {
-		if i.GuildID != discord.guildID {
+		if i.GuildID != discord.guildID || i.Interaction.Type != discordgo.InteractionApplicationCommand {
 			return
 		}
 
