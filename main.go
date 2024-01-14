@@ -29,7 +29,7 @@ func main() {
 	var db_file string
 	var version bool
 	flag.StringVar(&config_file, "c", defaultConfigPath, "Path to config file")
-	flag.StringVar(&db_file, "db", defaultDBPath, "Path to store persistant data")
+	flag.StringVar(&db_file, "db", defaultDBPath, "Path to store persistent data")
 	flag.BoolVar(&version, "v", false, "List version")
 	flag.Parse()
 
@@ -79,6 +79,9 @@ func main() {
 	}
 	if cfg.Features.RecurringEvents.IsEnabled() {
 		loader.LoadComponent(modules.NewRecurringEventsComponent(bot.Session))
+	}
+	if cfg.Features.StatusPortal.IsEnabled() {
+		loader.LoadComponent(modules.NewStatusComponent(cfg.StatusPortal.URL))
 	}
 
 	if cfg.Features.RoleSelection.IsEnabledByDefault() {

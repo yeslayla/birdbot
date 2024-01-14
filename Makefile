@@ -24,9 +24,12 @@ go-generate:
 	@go generate $(generate)
 
 go-get:
-	@go env -w GOPRIVATE=github.com/meteoritesolutions
 	@echo "  >  Checking if there is any missing dependencies..."
 	@go get $(get)
+
+go-get-upgrade:
+	@echo "  >  Updating dependencies..."
+	@go get $(get) -u
 
 go-install:
 	@echo "  >  Running go install..."
@@ -55,6 +58,9 @@ docker-push: docker-build
 
 ## install: Download and install dependencies
 install: go-get
+
+## upgrade: Update Go packages
+upgrade: go-get-upgrade
 
 # clean: Runs go clean
 clean: go-clean

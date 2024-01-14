@@ -14,17 +14,17 @@ type roleSelectionModule struct {
 	session *discord.Discord
 	db      persistence.Database
 
-	cfg      core.RoleSelectionConfig
-	exlusive bool
+	cfg       core.RoleSelectionConfig
+	exclusive bool
 }
 
 // NewRoleSelectionComponent creates a new component
 func NewRoleSelectionComponent(discord *discord.Discord, db persistence.Database, cfg core.RoleSelectionConfig) common.Module {
 	return &roleSelectionModule{
-		session:  discord,
-		cfg:      cfg,
-		db:       db,
-		exlusive: true,
+		session:   discord,
+		cfg:       cfg,
+		db:        db,
+		exclusive: true,
 	}
 }
 
@@ -49,27 +49,30 @@ func (c *roleSelectionModule) Initialize(birdbot common.ModuleManager) error {
 		btn := c.session.NewButton(fmt.Sprint(c.cfg.Title, role.Name), role.Name)
 		btn.OnClick(func(user common.User) {
 
-			// Remove other roles if exclusive
-			if c.exlusive {
-				for _, r := range roles {
-					if r.ID == role.ID {
-						continue
-					}
+			// Assign the roles asynchronously to avoid Discord's response timeout
+			go func() {
+				// Remove other roles if exclusive
+				if c.exclusive {
+					for _, r := range roles {
+						if r.ID == role.ID {
+							continue
+						}
 
-					if c.session.HasRole(user, r) {
-						c.session.UnassignRole(user, r)
+						if c.session.HasRole(user, r) {
+							c.session.UnassignRole(user, r)
+						}
 					}
 				}
-			}
 
-			// Toggle role
-			if c.session.HasRole(user, role) {
-				if err := c.session.UnassignRole(user, role); err != nil {
-					log.Printf("Failed to unassign role: %s", err)
+				// Toggle role
+				if c.session.HasRole(user, role) {
+					if err := c.session.UnassignRole(user, role); err != nil {
+						log.Printf("Failed to unassign role: %s", err)
+					}
+				} else if err := c.session.AssignRole(user, role); err != nil {
+					log.Printf("Failed to assign role: %s", err)
 				}
-			} else if err := c.session.AssignRole(user, role); err != nil {
-				log.Printf("Failed to assign role: %s", err)
-			}
+			}()
 
 		})
 

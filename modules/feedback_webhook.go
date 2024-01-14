@@ -29,7 +29,7 @@ func NewFeedbackWebhookComponent(webhookURL string, config FeedbackWebhookConfig
 	m := &feedbackWebhookModule{
 		webhookURL:     webhookURL,
 		payloadType:    "default",
-		successMessage: "Feedback recieved!",
+		successMessage: "Feedback received!",
 		failureMessage: "Failed to send feedback!",
 	}
 

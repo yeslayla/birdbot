@@ -4,10 +4,11 @@ import "strings"
 
 // Config is used to modify the behavior of birdbot externally
 type Config struct {
-	Discord  DiscordConfig  `yaml:"discord"`
-	Mastodon MastodonConfig `yaml:"mastodon"`
-	Feedback Feedback       `yaml:"feedback"`
-	Features Features       `yaml:"features"`
+	Discord      DiscordConfig  `yaml:"discord"`
+	Mastodon     MastodonConfig `yaml:"mastodon"`
+	Feedback     Feedback       `yaml:"feedback"`
+	StatusPortal StatusPortal   `yaml:"status_portal"`
+	Features     Features       `yaml:"features"`
 }
 
 // DiscordConfig contains discord specific configuration
@@ -31,6 +32,10 @@ type Feedback struct {
 
 	SuccessMessage string `yaml:"success_message"`
 	FailureMessage string `yaml:"failure_message"`
+}
+
+type StatusPortal struct {
+	URL string `yaml:"url" env:"BIRD_STATUS_PORTAL_URL"`
 }
 
 type RoleSelectionConfig struct {
@@ -63,6 +68,7 @@ type Features struct {
 	RoleSelection       Feature `yaml:"role_selection" env:"BIRD_ROLE_SELECTION"`
 	Feedback            Feature `yaml:"feedback" env:"BIRD_FEEDBACK"`
 	LoadGamePlugins     Feature `yaml:"load_game_plugins" env:"BIRD_LOAD_GAME_PLUGINS"`
+	StatusPortal        Feature `yaml:"status_portal" env:"BIRD_STATUS_PORTAL"`
 }
 
 // Feature is a boolean string used to toggle functionality
