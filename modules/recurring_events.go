@@ -13,6 +13,9 @@ type recurringEventsModule struct {
 }
 
 // NewRecurringEventsComponent creates a new component instance
+//
+// Deprecated: This recurring events are now a native feature in Discord,
+// so this will be removed in the next version.
 func NewRecurringEventsComponent(session *discord.Discord) common.Module {
 	return &recurringEventsModule{
 		session: session,
