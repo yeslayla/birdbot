@@ -67,6 +67,9 @@ func (discord *Discord) Run() error {
 		}
 	})
 
+	// Validate state
+	discord.RefreshWebhookState()
+
 	// Keep alive
 	discord.stop = make(chan os.Signal, 1)
 	signal.Notify(discord.stop, os.Interrupt)

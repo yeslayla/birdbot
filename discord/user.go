@@ -1,6 +1,11 @@
 package discord
 
 import (
+	"bytes"
+	"encoding/base64"
+	"fmt"
+	"image"
+	"image/jpeg"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
@@ -21,6 +26,36 @@ func NewUser(user *discordgo.User) common.User {
 		DisplayName: user.Username,
 		ID:          user.ID,
 	}
+}
+
+// GetAvatar returns the users Avatar as a image.Image
+func (discord *Discord) GetAvatar(user common.User) image.Image {
+	discordUser, err := discord.session.User(user.ID)
+	if err != nil {
+		log.Println("Error getting user: ", err)
+		return nil
+	}
+
+	avatar, err := discord.session.UserAvatarDecode(discordUser)
+	if err != nil {
+		log.Println("Error decoding avatar: ", err)
+		return nil
+	}
+
+	return avatar
+}
+
+// GetAvatarBase64 returns the base64 encoded avatar of a user
+func (discord *Discord) GetAvatarBase64(user common.User) string {
+	avatar := discord.GetAvatar(user)
+
+	fmtAvatar := &bytes.Buffer{}
+	if err := jpeg.Encode(fmtAvatar, avatar, nil); err != nil {
+		log.Println("Error encoding avatar: ", err)
+		return ""
+	}
+
+	return fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(fmtAvatar.Bytes()))
 }
 
 // AssignRole adds a role to a user
