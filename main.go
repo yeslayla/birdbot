@@ -16,7 +16,7 @@ import (
 	"github.com/yeslayla/birdbot/persistence"
 )
 
-const PluginsDirectory = "/home/layla/.config/birdbot/plugins"
+const PluginsDirectory = "./plugins"
 
 func main() {
 
