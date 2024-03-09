@@ -9,6 +9,7 @@ type Button struct {
 	Label string
 	ID    string
 
+	Emoji   *Emoji
 	discord *Discord
 }
 
@@ -18,6 +19,17 @@ func (discord *Discord) NewButton(id string, label string) *Button {
 		discord: discord,
 		ID:      id,
 		Label:   label,
+		Emoji:   nil,
+	}
+}
+
+// NewButtonWithEmoji creates a new button component with a emoji
+func (discord *Discord) NewButtonWithEmoji(id string, label string, emoji *Emoji) *Button {
+	return &Button{
+		discord: discord,
+		ID:      id,
+		Label:   label,
+		Emoji:   emoji,
 	}
 }
 
@@ -41,9 +53,16 @@ func (button *Button) OnClick(action func(user common.User)) {
 }
 
 func (button *Button) toMessageComponent() discordgo.MessageComponent {
-	return discordgo.Button{
+	cmp := discordgo.Button{
 		Label:    button.Label,
 		CustomID: button.ID,
 		Style:    discordgo.PrimaryButton,
 	}
+	if button.Emoji != nil {
+		cmp.Emoji = &discordgo.ComponentEmoji{
+			Name: button.Emoji.Name,
+			ID:   button.Emoji.ID,
+		}
+	}
+	return cmp
 }

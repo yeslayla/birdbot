@@ -40,13 +40,43 @@ func (c *roleSelectionModule) Initialize(birdbot common.ModuleManager) error {
 		role := c.session.GetRoleAndCreate(roleConfig.RoleName)
 		configColor, _ := core.HexToColor(roleConfig.Color)
 
+		var emoji *discord.Emoji = nil
+		if c.cfg.GenerateColorEmoji.IsEnabledByDefault() {
+			emoji = c.session.GetEmoji(roleConfig.RoleName)
+			if emoji == nil {
+				emoji = c.session.CreateEmoji(roleConfig.RoleName, core.ColorToImage(configColor))
+				if emoji == nil {
+					log.Printf("Failed to create emoji for role: %s", roleConfig.RoleName)
+					return nil
+				}
+			}
+
+			// If role.ID in emoji.Roles
+			var found bool
+			for _, r := range emoji.Roles {
+				if r == role.ID {
+					found = true
+					break
+				}
+			}
+			if !found {
+				emoji.Roles = append(emoji.Roles, role.ID)
+				emoji.Save()
+			}
+		}
+
 		if role.Color != configColor {
 			role.Color = configColor
 			role.Save()
 		}
 
 		// Create button
-		btn := c.session.NewButton(fmt.Sprint(c.cfg.Title, role.Name), role.Name)
+		var btn *discord.Button
+		if emoji != nil {
+			btn = c.session.NewButtonWithEmoji(fmt.Sprint(c.cfg.Title, roleConfig.RoleName), roleConfig.RoleName, emoji)
+		} else {
+			btn = c.session.NewButton(fmt.Sprint(c.cfg.Title, role.Name), role.Name)
+		}
 		btn.OnClick(func(user common.User) {
 
 			// Assign the roles asynchronously to avoid Discord's response timeout
@@ -97,10 +127,16 @@ func (c *roleSelectionModule) Initialize(birdbot common.ModuleManager) error {
 		return err
 	}
 
-	if messageID == "" {
-		messageID = c.session.CreateMessageComponent(c.cfg.SelectionChannel, fmt.Sprintf("**%s**\n%s", c.cfg.Title, c.cfg.Description), components)
-		return c.db.SetDiscordMessage(localID, messageID)
+	// Update message
+	if messageID != "" {
+		resultID := c.session.UpdateMessageComponent(messageID, c.cfg.SelectionChannel, fmt.Sprintf("**%s**\n%s", c.cfg.Title, c.cfg.Description), components)
+		if resultID != "" {
+			return nil
+		}
 	}
 
-	return nil
+	// Create new message
+	messageID = c.session.CreateMessageComponent(c.cfg.SelectionChannel, fmt.Sprintf("**%s**\n%s", c.cfg.Title, c.cfg.Description), components)
+	return c.db.SetDiscordMessage(localID, messageID)
+
 }

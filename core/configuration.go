@@ -39,8 +39,9 @@ type StatusPortal struct {
 }
 
 type RoleSelectionConfig struct {
-	Title       string `yaml:"title"`
-	Description string `yaml:"description"`
+	Title              string  `yaml:"title"`
+	Description        string  `yaml:"description"`
+	GenerateColorEmoji Feature `yaml:"generate_color_emoji"`
 
 	SelectionChannel string       `yaml:"discord_channel"`
 	Roles            []RoleConfig `yaml:"roles"`

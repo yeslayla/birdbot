@@ -1,15 +1,12 @@
 package discord
 
 import (
-	"bytes"
-	"encoding/base64"
-	"fmt"
 	"image"
-	"image/jpeg"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/yeslayla/birdbot-common/common"
+	"github.com/yeslayla/birdbot/core"
 )
 
 // NewUser creates a new user object from a discordgo.User object
@@ -49,13 +46,7 @@ func (discord *Discord) GetAvatar(user common.User) image.Image {
 func (discord *Discord) GetAvatarBase64(user common.User) string {
 	avatar := discord.GetAvatar(user)
 
-	fmtAvatar := &bytes.Buffer{}
-	if err := jpeg.Encode(fmtAvatar, avatar, nil); err != nil {
-		log.Println("Error encoding avatar: ", err)
-		return ""
-	}
-
-	return fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(fmtAvatar.Bytes()))
+	return core.ImageToBase64(avatar)
 }
 
 // AssignRole adds a role to a user
